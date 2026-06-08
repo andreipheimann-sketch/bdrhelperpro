@@ -464,38 +464,100 @@ function AccountCard(props) {
 
 // ── PIPELINE VIEW ─────────────────────────────────────────────────────────────
 function PipelineView(props) {
+  var [dragId, setDragId] = useState(null);
+  var [dragOver, setDragOver] = useState(null);
+
+  function onDragStart(e, accId) {
+    setDragId(accId);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", accId);
+    e.currentTarget.style.opacity = "0.4";
+    e.currentTarget.style.transform = "rotate(2deg) scale(0.97)";
+  }
+  function onDragEnd(e) {
+    setDragId(null);
+    setDragOver(null);
+    e.currentTarget.style.opacity = "";
+    e.currentTarget.style.transform = "";
+  }
+  function onDragOverCol(e, col) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOver(col);
+  }
+  function onDragLeaveCol() {
+    setDragOver(null);
+  }
+  function onDrop(e, col) {
+    e.preventDefault();
+    var id = e.dataTransfer.getData("text/plain") || dragId;
+    if (id && col) {
+      var acc = props.accounts.find(function(a){return a.id===id;});
+      if (acc && acc.status !== col) {
+        props.onStatusChange(id, col);
+      }
+    }
+    setDragId(null);
+    setDragOver(null);
+  }
+
   return (
     <div style={{overflowX:"auto",paddingBottom:16}}>
       <div style={{display:"flex",gap:14,minWidth:900}}>
         {STATUS_ORDER.map(function(col) {
           var sc = STATUS_CONFIG[col];
           var cards = props.accounts.filter(function(a){return a.status===col;});
+          var isOver = dragOver === col;
+          var isDraggingHere = dragId && cards.some(function(a){return a.id===dragId;});
           return (
-            <div key={col} style={{flex:1,minWidth:155,background:"#f8fafc",borderRadius:16,padding:14,border:"1px solid #e8edf4"}}>
+            <div key={col}
+              onDragOver={function(e){onDragOverCol(e,col);}}
+              onDragLeave={onDragLeaveCol}
+              onDrop={function(e){onDrop(e,col);}}
+              style={{flex:1,minWidth:155,background:isOver?"rgba(16,185,129,.06)":"#f8fafc",borderRadius:16,padding:14,border:"1.5px solid "+(isOver?"#10b981":"#e8edf4"),transition:"all .2s cubic-bezier(.22,1,.36,1)",boxShadow:isOver?"0 0 0 3px rgba(16,185,129,.12)":"none"}}>
               <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:12}}>
                 <div style={{width:8,height:8,borderRadius:"50%",background:sc.color}}/>
                 <div style={{fontSize:9,fontWeight:700,color:sc.color,textTransform:"uppercase",letterSpacing:.8}}>{sc.label}</div>
                 <div style={{marginLeft:"auto",fontSize:10,fontWeight:700,color:"#94a3b8",background:"#e2e8f0",borderRadius:20,padding:"1px 7px"}}>{cards.length}</div>
               </div>
-              <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              <div style={{display:"flex",flexDirection:"column",gap:8,minHeight:60}}>
                 {cards.map(function(acc) {
                   var fc = FIT_CONFIG[acc.fit] || FIT_CONFIG.ALTO;
+                  var isDragging = dragId === acc.id;
                   return (
-                    <div key={acc.id} onClick={function(){props.onOpen(acc);}} style={{background:"#fff",border:"1px solid #edf0f7",borderRadius:14,padding:"12px 14px",cursor:"pointer",transition:"all .25s cubic-bezier(.22,1,.36,1)",boxShadow:"0 1px 4px rgba(15,23,42,.05)"}}
-                      onMouseEnter={function(e){e.currentTarget.style.borderColor="#10b981";e.currentTarget.style.transform="translateY(-1px)";}}
-                      onMouseLeave={function(e){e.currentTarget.style.borderColor="#e8edf4";e.currentTarget.style.transform="";}}>
-                      <div style={{fontSize:12,fontWeight:700,color:"#0f172a",marginBottom:3,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{acc.nome}</div>
+                    <div key={acc.id}
+                      draggable="true"
+                      onDragStart={function(e){onDragStart(e,acc.id);}}
+                      onDragEnd={onDragEnd}
+                      onClick={function(){if(!dragId)props.onOpen(acc);}}
+                      style={{background:"#fff",border:"1px solid "+(isDragging?"#10b981":"#edf0f7"),borderRadius:14,padding:"12px 14px",cursor:"grab",transition:"box-shadow .2s,border-color .2s",boxShadow:"0 1px 4px rgba(15,23,42,.05)",userSelect:"none",opacity:isDragging?0.4:1}}>
+                      <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:3}}>
+                        <div style={{fontSize:12,fontWeight:700,color:"#0f172a",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{acc.nome}</div>
+                        <div style={{fontSize:14,color:"#cbd5e1",marginLeft:6,flexShrink:0,lineHeight:1}}>⠿</div>
+                      </div>
                       <div style={{fontSize:10,color:"#94a3b8",marginBottom:8,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{acc.setor}</div>
-                      <span style={{background:fc.bg,border:"1px solid "+fc.border,color:fc.text,borderRadius:6,padding:"2px 7px",fontSize:8,fontWeight:700}}>{"FIT "+acc.fit}</span>
+                      <div style={{display:"flex",gap:5,alignItems:"center"}}>
+                        <span style={{background:fc.bg,border:"1px solid "+fc.border,color:fc.text,borderRadius:6,padding:"2px 7px",fontSize:8,fontWeight:700}}>{"FIT "+acc.fit}</span>
+                        <span style={{fontSize:8,color:TIER_COLOR[acc.tier]||"#94a3b8",fontWeight:700}}>{acc.tier}</span>
+                      </div>
                     </div>
                   );
                 })}
-                {cards.length===0&&<div style={{textAlign:"center",padding:"24px 8px",color:"#e2e8f0",fontSize:11}}>Vazio</div>}
+                {cards.length===0&&(
+                  <div style={{textAlign:"center",padding:"28px 8px",color:isOver?"#10b981":"#cbd5e1",fontSize:11,border:"2px dashed "+(isOver?"#10b981":"#e8edf4"),borderRadius:10,transition:"all .2s"}}>
+                    {isOver?"Soltar aqui":"Vazio"}
+                  </div>
+                )}
               </div>
             </div>
           );
         })}
       </div>
+      {dragId && (
+        <div style={{marginTop:12,textAlign:"center",fontSize:11,color:"#94a3b8"}}>
+          Arraste para outra coluna para mover o card
+        </div>
+      )}
     </div>
   );
 }
@@ -507,70 +569,192 @@ function AccountModal(props) {
   var fit = (d.fit && d.fit.score) || acc.fit;
   var fc = FIT_CONFIG[fit] || FIT_CONFIG.ALTO;
   var sc = STATUS_CONFIG[acc.status] || STATUS_CONFIG.prospecting;
+  var [activeTab, setActiveTab] = useState("overview");
 
   function sd(path) {
     try { var parts=path.split("."); var cur=d; for(var i=0;i<parts.length;i++){cur=cur[parts[i]];if(cur==null)return null;} return cur; } catch(e){return null;}
   }
 
+  var tabs=[{id:"overview",label:"Visao Geral"},{id:"stakeholders",label:"Stakeholders"},{id:"messages",label:"Mensagens"},{id:"spin",label:"SPIN & Objecoes"},{id:"plan",label:"Plano de Acao"}];
+  var empresa=sd("empresa")||{};
+  var stakeholders=safeArr(sd("stakeholders"));
+  var dores=safeArr(sd("dores.principais"));
+  var exposicao=safeArr(sd("dores.exposicao_regulatoria"));
+  var sinais=safeArr(sd("dores.sinais_ativos"));
+  var triggers=safeArr(sd("triggers"));
+  var noticias=safeArr(sd("noticias"));
+  var spin=safeArr(sd("estrategia.perguntas_spin"));
+  var objecoes=safeArr(sd("estrategia.objecoes"));
+  var ae=safeArr(sd("proximos_passos.ae"));
+  var bdr=safeArr(sd("proximos_passos.bdr"));
+  var prazo=sd("proximos_passos.prazo")||"";
+  var useCases=safeArr(sd("fit.use_cases"));
+  var solucoes=safeArr(sd("fit.solucoes_conviso"));
+  var fitJust=sd("fit.justificativa")||"";
+  var concorrentes=safeArr(sd("mercado.competidores_provedor"));
+  var CHANNELS=[{key:"emails",label:"E-mail",color:"#0ea5e9",bg:"rgba(14,165,233,.08)",isObj:true},{key:"inmails",label:"InMail",color:"#0a66c2",bg:"rgba(10,102,194,.08)",isObj:true},{key:"whatsapps",label:"WhatsApp",color:"#16a34a",bg:"rgba(22,163,74,.08)",isObj:false},{key:"cold_calls",label:"Cold Call",color:"#92400e",bg:"#fef3c7",isObj:false}];
+
   return (
-    <div style={{position:"fixed",inset:0,background:"rgba(15,23,42,.7)",zIndex:200,display:"flex",alignItems:"flex-start",justifyContent:"center",padding:"24px 16px",overflowY:"auto",backdropFilter:"blur(8px)"}}>
-      <div style={{background:"rgba(255,255,255,.98)",borderRadius:24,width:"100%",maxWidth:720,boxShadow:"0 32px 100px rgba(15,23,42,.28),0 0 0 1px rgba(255,255,255,.8)"}}>
-        <div style={{padding:"24px 28px",borderBottom:"1px solid #f1f5f9",display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:16}}>
-          <div style={{flex:1,minWidth:0}}>
-            <div style={{fontSize:20,fontWeight:800,color:"#0f172a",marginBottom:3}}>{acc.nome}</div>
-            <div style={{fontSize:12,color:"#94a3b8",marginBottom:12}}>{acc.setor}</div>
-            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-              <span style={{background:fc.bg,border:"1px solid "+fc.border,color:fc.text,borderRadius:8,padding:"4px 12px",fontSize:9,fontWeight:700}}>{"FIT "+fit}</span>
-              <span style={{background:"#f8fafc",border:"1px solid "+(TIER_COLOR[acc.tier]||"#e2e8f0"),color:TIER_COLOR[acc.tier]||"#94a3b8",borderRadius:8,padding:"4px 12px",fontSize:9,fontWeight:700}}>{acc.tier}</span>
-              <span style={{background:sc.bg,border:"1px solid "+sc.border,color:sc.color,borderRadius:8,padding:"4px 12px",fontSize:9,fontWeight:700}}>{sc.label}</span>
+    <div style={{position:"fixed",inset:0,background:"rgba(15,23,42,.75)",zIndex:200,display:"flex",alignItems:"flex-start",justifyContent:"center",padding:"20px 16px",overflowY:"auto",backdropFilter:"blur(10px)"}}>
+      <div style={{background:"rgba(255,255,255,.99)",borderRadius:24,width:"100%",maxWidth:820,boxShadow:"0 32px 100px rgba(15,23,42,.3)"}}>
+        <div style={{padding:"22px 28px 0",borderBottom:"1px solid #f1f5f9"}}>
+          <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:16,marginBottom:16}}>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
+                <div style={{fontSize:21,fontWeight:800,color:"#0f172a",lineHeight:1.2}}>{acc.nome}</div>
+                {acc.liveMode&&<span style={{background:"#dcfce7",border:"1px solid #86efac",color:"#065f46",borderRadius:6,padding:"2px 8px",fontSize:8,fontWeight:700}}>LIVE</span>}
+              </div>
+              <div style={{fontSize:12,color:"#94a3b8",marginBottom:10}}>{acc.setor}</div>
+              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                <span style={{background:fc.bg,border:"1px solid "+fc.border,color:fc.text,borderRadius:8,padding:"4px 12px",fontSize:9,fontWeight:700}}>{"FIT "+fit}</span>
+                <span style={{background:"#f8fafc",border:"1px solid "+(TIER_COLOR[acc.tier]||"#e2e8f0"),color:TIER_COLOR[acc.tier]||"#94a3b8",borderRadius:8,padding:"4px 12px",fontSize:9,fontWeight:700}}>{acc.tier}</span>
+                <span style={{background:sc.bg,border:"1px solid "+sc.border,color:sc.color,borderRadius:8,padding:"4px 12px",fontSize:9,fontWeight:700}}>{sc.label}</span>
+                <span style={{background:"#f8fafc",color:"#94a3b8",borderRadius:8,padding:"4px 12px",fontSize:9}}>{"Salvo "+fmtDate(acc.savedAt)}</span>
+              </div>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:6,flexShrink:0,alignItems:"flex-end"}}>
+              <div style={{display:"flex",gap:4,flexWrap:"wrap",maxWidth:200}}>
+                {STATUS_ORDER.map(function(s){var sc2=STATUS_CONFIG[s];return <button key={s} onClick={function(){props.onStatusChange(acc.id,s);}} style={{background:acc.status===s?sc2.bg:"#f8fafc",border:"1px solid "+(acc.status===s?sc2.border:"#e2e8f0"),color:acc.status===s?sc2.color:"#94a3b8",borderRadius:6,padding:"3px 8px",fontSize:9,fontWeight:600,cursor:"pointer",fontFamily:"inherit",transition:"all .15s"}}>{sc2.label}</button>;})}
+              </div>
+              <button onClick={props.onClose} style={{background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:10,padding:"7px 14px",cursor:"pointer",color:"#64748b",fontSize:12,fontWeight:600,fontFamily:"inherit"}}>Fechar</button>
             </div>
           </div>
-          <div style={{display:"flex",gap:6,flexShrink:0,flexWrap:"wrap",maxWidth:200}}>
-            {STATUS_ORDER.map(function(s) {
-              var sc2=STATUS_CONFIG[s];
-              return <button key={s} onClick={function(){props.onStatusChange(acc.id,s);}} style={{background:acc.status===s?sc2.bg:"#f8fafc",border:"1px solid "+(acc.status===s?sc2.border:"#e2e8f0"),color:acc.status===s?sc2.color:"#94a3b8",borderRadius:6,padding:"3px 8px",fontSize:9,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>{sc2.label}</button>;
-            })}
+          <div style={{display:"flex",gap:0,overflowX:"auto"}}>
+            {tabs.map(function(tab){var active=activeTab===tab.id;return <button key={tab.id} onClick={function(){setActiveTab(tab.id);}} style={{padding:"10px 16px",border:"none",borderBottom:"2.5px solid "+(active?"#10b981":"transparent"),background:"transparent",color:active?"#059669":"#94a3b8",cursor:"pointer",fontFamily:"inherit",fontSize:12,fontWeight:active?700:500,transition:"all .15s",whiteSpace:"nowrap"}}>{tab.label}</button>;})}
           </div>
-          <button onClick={props.onClose} style={{background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:10,padding:"8px 12px",cursor:"pointer",color:"#64748b",fontSize:18,lineHeight:1,fontFamily:"inherit",flexShrink:0}}>x</button>
         </div>
-        <div style={{padding:"22px 28px",maxHeight:"68vh",overflowY:"auto"}}>
-          {sd("empresa.resumo")&&<Sec title="Visão Geral"><p style={{fontSize:13,lineHeight:1.75,color:"#334155",margin:0}}>{sd("empresa.resumo")}</p></Sec>}
-          {safeArr(sd("dores.principais")).length>0&&<Sec title="Dores Mapeadas">{safeArr(sd("dores.principais")).map(function(d2,i){return <R key={i} icon="!" color="#ef4444">{d2}</R>;})}</Sec>}
-          {safeArr(sd("stakeholders")).length>0&&(
-            <Sec title="Stakeholders">
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-                {safeArr(sd("stakeholders")).map(function(s,i){
+
+        <div style={{padding:"22px 28px",maxHeight:"60vh",overflowY:"auto"}}>
+
+          {activeTab==="overview"&&(
+            <div>
+              {empresa.resumo&&<Sec title="Resumo da Empresa"><p style={{fontSize:13,lineHeight:1.8,color:"#334155",margin:"0 0 14px"}}>{empresa.resumo}</p><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:8}}>{[["Setor",empresa.setor],["Porte",empresa.tamanho],["Faturamento",empresa.faturamento],["Clientes",empresa.clientes],["Estagio",empresa.estagio],["Bolsa",empresa.bolsa]].filter(function(x){return x[1];}).map(function(item){return <div key={item[0]} style={{background:"#dcfce7",border:"1px solid #bbf7d0",borderRadius:10,padding:"10px 12px"}}><div style={{fontSize:8,color:"#065f46",textTransform:"uppercase",letterSpacing:1,fontWeight:700,marginBottom:3}}>{item[0]}</div><div style={{fontSize:12,color:"#0f172a",fontWeight:600}}>{item[1]}</div></div>;})}</div></Sec>}
+              {fitJust&&<Sec title="Fit Conviso"><p style={{fontSize:13,lineHeight:1.7,color:"#334155",marginBottom:10}}>{fitJust}</p>{solucoes.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:6}}>{solucoes.map(function(s,i){return <span key={i} style={{background:"rgba(16,185,129,.08)",border:"1px solid rgba(16,185,129,.25)",color:"#059669",borderRadius:8,padding:"3px 10px",fontSize:10,fontWeight:600}}>{s}</span>;})}</div>}</Sec>}
+              {useCases.length>0&&<Sec title="Use Cases">{useCases.map(function(u,i){return <R key={i} icon=">" color="#10b981">{u}</R>;})}</Sec>}
+              {dores.length>0&&<Sec title="Dores Mapeadas">{dores.map(function(d2,i){return <R key={i} icon="!" color="#ef4444">{d2}</R>;})} {exposicao.length>0&&<div style={{marginTop:10,display:"flex",flexWrap:"wrap",gap:6}}>{exposicao.map(function(r,i){return <span key={i} style={{background:"#fef3c7",border:"1px solid #f59e0b",color:"#92400e",borderRadius:8,padding:"3px 10px",fontSize:10,fontWeight:600}}>{r}</span>;})}</div>}</Sec>}
+              {triggers.length>0&&<Sec title="Gatilhos Comerciais">{triggers.map(function(t,i){return <R key={i} icon="T" color="#7c3aed">{t}</R>;})}</Sec>}
+              {sinais.length>0&&<Sec title="Sinais de Intencao"><div style={{background:"#0c2340",borderRadius:12,padding:"12px 16px"}}>{sinais.map(function(s,i){return <div key={i} style={{fontSize:11.5,color:"#7dd3fc",lineHeight:1.6,display:"flex",gap:8,marginBottom:5}}><span style={{color:"#38bdf8",flexShrink:0}}>o</span>{s}</div>;})}</div></Sec>}
+              {concorrentes.length>0&&<Sec title="Concorrentes Provaveis"><div style={{display:"flex",flexWrap:"wrap",gap:6}}>{concorrentes.map(function(cc,i){return <span key={i} style={{background:"#fef3c7",border:"1px solid #f59e0b",color:"#92400e",borderRadius:8,padding:"3px 10px",fontSize:10,fontWeight:600}}>{cc}</span>;})}</div></Sec>}
+              {noticias.length>0&&<Sec title="Noticias e Contexto">{noticias.map(function(n,i){return <div key={i} style={{background:"#f8fafc",border:"1px solid #e8edf4",borderRadius:12,padding:"12px 14px",marginBottom:8}}>{n.url?<a href={n.url} target="_blank" rel="noopener noreferrer" style={{fontSize:12.5,fontWeight:700,color:"#0ea5e9",textDecoration:"none",display:"block",marginBottom:3}}>{n.titulo}</a>:<div style={{fontSize:12.5,fontWeight:700,color:"#0f172a",marginBottom:3}}>{n.titulo}</div>}<div style={{fontSize:11.5,color:"#64748b",lineHeight:1.6,marginBottom:3}}>{n.resumo}</div><div style={{fontSize:10,color:"#059669",fontWeight:600}}>{"> "+n.relevancia}</div></div>;})}</Sec>}
+            </div>
+          )}
+
+          {activeTab==="stakeholders"&&(
+            <Sec title="Organograma de Stakeholders">
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                {stakeholders.map(function(s,i){
                   var pc=s.prioridade==="PRIMARIO"?"#065f46":s.prioridade==="SECUNDARIO"?"#92400e":"#475569";
-                  return <div key={i} style={{background:"#f8fafc",border:"1px solid #e8edf4",borderRadius:12,padding:"12px 14px"}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}><div style={{fontSize:12,fontWeight:700,color:"#0f172a",flex:1,lineHeight:1.3}}>{s.cargo}</div><span style={{background:pc+"20",border:"1px solid "+pc,color:pc,borderRadius:5,padding:"1px 6px",fontSize:8,fontWeight:700,flexShrink:0,marginLeft:6}}>{s.prioridade}</span></div><div style={{fontSize:11,color:"#64748b",lineHeight:1.55}}>{s.angulo}</div></div>;
+                  var uc=s.urgencia==="Alta"?"#991b1b":s.urgencia==="Media"||s.urgencia==="Média"?"#92400e":"#64748b";
+                  return (
+                    <div key={i} style={{background:"#f8fafc",border:"1.5px solid #e8edf4",borderRadius:14,padding:"16px",transition:"all .2s"}}
+                      onMouseEnter={function(e){e.currentTarget.style.borderColor="#10b981";e.currentTarget.style.background="#fff";e.currentTarget.style.boxShadow="0 4px 16px rgba(16,185,129,.1)";}}
+                      onMouseLeave={function(e){e.currentTarget.style.borderColor="#e8edf4";e.currentTarget.style.background="#f8fafc";e.currentTarget.style.boxShadow="";}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
+                        <div style={{fontSize:13,fontWeight:700,color:"#0f172a",lineHeight:1.3,flex:1}}>{s.cargo}</div>
+                        <div style={{display:"flex",flexDirection:"column",gap:3,alignItems:"flex-end",marginLeft:8,flexShrink:0}}>
+                          <span style={{background:pc+"20",border:"1px solid "+pc,color:pc,borderRadius:6,padding:"2px 8px",fontSize:8,fontWeight:700,whiteSpace:"nowrap"}}>{s.prioridade}</span>
+                          <span style={{fontSize:8,color:uc,fontWeight:600}}>{"Urgencia: "+s.urgencia}</span>
+                        </div>
+                      </div>
+                      <div style={{fontSize:11.5,color:"#64748b",lineHeight:1.65,marginBottom:s.linkedin||s.email?10:0}}>{s.angulo}</div>
+                      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                        {s.linkedin&&<a href={s.linkedin.startsWith("http")?s.linkedin:"https://linkedin.com/in/"+s.linkedin} target="_blank" rel="noopener noreferrer" style={{display:"inline-flex",alignItems:"center",gap:5,fontSize:10,color:"#0a66c2",textDecoration:"none",background:"rgba(10,102,194,.07)",border:"1px solid rgba(10,102,194,.2)",borderRadius:6,padding:"4px 10px",fontWeight:600}}>{"in  Ver LinkedIn"}</a>}
+                        {s.email&&<a href={"mailto:"+s.email} style={{display:"inline-flex",alignItems:"center",gap:5,fontSize:10,color:"#0ea5e9",textDecoration:"none",background:"rgba(14,165,233,.06)",border:"1px solid rgba(14,165,233,.2)",borderRadius:6,padding:"4px 10px",fontWeight:600}}>{s.email}</a>}
+                        {s.phone&&<span style={{display:"inline-flex",alignItems:"center",fontSize:10,color:"#64748b",background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:6,padding:"4px 10px"}}>{s.phone}</span>}
+                      </div>
+                    </div>
+                  );
                 })}
               </div>
             </Sec>
           )}
-          {safeArr(sd("estrategia.emails")).length>0&&(
-            <Sec title="Mensagens, Template 1">
-              {[{key:"emails",label:"E-mail",color:"#0ea5e9",isObj:true},{key:"inmails",label:"InMail",color:"#0a66c2",isObj:true},{key:"whatsapps",label:"WhatsApp",color:"#16a34a",isObj:false},{key:"cold_calls",label:"Cold Call",color:"#92400e",isObj:false}].map(function(cfg){
+
+          {activeTab==="messages"&&(
+            <div>
+              {CHANNELS.map(function(cfg){
                 var items=safeArr(sd("estrategia."+cfg.key));
                 if(!items.length)return null;
-                var item=items[0];
-                var text=cfg.isObj?item.corpo:item;
-                return <div key={cfg.key} style={{marginBottom:12}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}><span style={{fontSize:9,fontWeight:700,color:cfg.color,letterSpacing:1.5,textTransform:"uppercase"}}>{cfg.label}</span><CopyBtn text={(cfg.isObj&&item.assunto?"Assunto: "+item.assunto+"\n\n":"")+text}/></div><div style={{background:"#f8fafc",borderLeft:"3px solid "+cfg.color,borderRadius:"0 10px 10px 0",padding:"12px 16px",fontSize:12,color:"#1e293b",whiteSpace:"pre-wrap",lineHeight:1.8}}>{text}</div></div>;
+                return (
+                  <Sec key={cfg.key} title={cfg.label}>
+                    <div style={{display:"flex",flexDirection:"column",gap:12}}>
+                      {items.map(function(item,i){
+                        var text=cfg.isObj?item.corpo:item;
+                        var ck=cfg.key+"-"+i;
+                        return (
+                          <div key={i} style={{border:"1.5px solid #e8edf4",borderRadius:14,overflow:"hidden"}}>
+                            <div style={{display:"flex",alignItems:"center",gap:8,padding:"10px 14px",background:cfg.bg,borderBottom:"1px solid #e8edf4"}}>
+                              <span style={{fontSize:10,fontWeight:700,color:cfg.color}}>{"Template "+(i+1)}</span>
+                              {cfg.isObj&&item.assunto&&<span style={{fontSize:11,color:"#64748b",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{"- "+item.assunto}</span>}
+                              <CopyBtn text={(cfg.isObj&&item.assunto?"Assunto: "+item.assunto+"
+
+":"")+text}/>
+                            </div>
+                            <div style={{padding:"14px 16px",fontSize:12.5,color:"#1e293b",whiteSpace:"pre-wrap",lineHeight:1.85,borderLeft:"3px solid "+cfg.color}}>{text}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Sec>
+                );
               })}
-            </Sec>
+            </div>
           )}
-          {safeArr(sd("estrategia.perguntas_spin")).length>0&&(
-            <Sec title="SPIN, Discovery">
-              {safeArr(sd("estrategia.perguntas_spin")).slice(0,6).map(function(q,i){
-                var tipo=q.startsWith("SITUAÇÃO")||q.startsWith("SITUAÇÃO")?"S":q.startsWith("PROBLEMA")?"P":q.startsWith("IMPLICAÇÃO")||q.startsWith("IMPLICAÇÃO")?"I":"N";
-                var tc=tipo==="S"?"#0ea5e9":tipo==="P"?"#92400e":tipo==="I"?"#991b1b":"#065f46";
-                return <R key={i} icon={tipo} color={tc}>{q.replace(/^(SITUAÇÃO|SITUACAO|PROBLEMA|IMPLICAÇÃO|IMPLICACAO|NECESSIDADE): /,"")}</R>;
-              })}
-            </Sec>
+
+          {activeTab==="spin"&&(
+            <div>
+              <Sec title="Perguntas SPIN">
+                {spin.map(function(q,i){
+                  var tipo=q.startsWith("SITUAÇÃO")||q.startsWith("SITUACAO")?"S":q.startsWith("PROBLEMA")?"P":q.startsWith("IMPLICAÇÃO")||q.startsWith("IMPLICACAO")?"I":"N";
+                  var tc=tipo==="S"?"#0ea5e9":tipo==="P"?"#92400e":tipo==="I"?"#991b1b":"#065f46";
+                  var clean=q.replace(/^(SITUAÇÃO|SITUACAO|PROBLEMA|IMPLICAÇÃO|IMPLICACAO|NECESSIDADE): /,"");
+                  return (
+                    <div key={i} style={{display:"flex",gap:10,padding:"10px 0",borderBottom:"1px solid #f1f5f9",alignItems:"flex-start"}}>
+                      <span style={{background:tc+"20",border:"1px solid "+tc+"50",color:tc,borderRadius:6,padding:"2px 8px",fontSize:9,fontWeight:800,flexShrink:0,marginTop:1}}>{tipo}</span>
+                      <span style={{fontSize:12.5,color:"#334155",lineHeight:1.6,flex:1}}>{clean}</span>
+                      <CopyBtn text={clean}/>
+                    </div>
+                  );
+                })}
+              </Sec>
+              {objecoes.length>0&&(
+                <Sec title="Objecoes e Respostas">
+                  {objecoes.map(function(o,i){
+                    return (
+                      <div key={i} style={{background:"#f8fafc",border:"1.5px solid #e8edf4",borderRadius:14,padding:"14px 16px",marginBottom:10}}>
+                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8,gap:8}}>
+                          <div style={{fontSize:12,fontWeight:700,color:"#92400e",lineHeight:1.4,flex:1}}>{'"'+o.objecao+'"'}</div>
+                          <CopyBtn text={'"'+o.objecao+'"
+-> '+o.resposta}/>
+                        </div>
+                        <div style={{fontSize:12,color:"#334155",lineHeight:1.65}}>{"-> "+o.resposta}</div>
+                      </div>
+                    );
+                  })}
+                </Sec>
+              )}
+            </div>
           )}
+
+          {activeTab==="plan"&&(
+            <div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:18}}>
+                <Sec title="AE , Acoes Imediatas">
+                  {ae.map(function(a,i){return <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"8px 0",borderBottom:"1px solid #f1f5f9",gap:8}}><div style={{display:"flex",gap:8,flex:1}}><span style={{color:"#10b981",flexShrink:0,fontWeight:700}}>{">"}</span><span style={{fontSize:12,color:"#334155",lineHeight:1.5}}>{a}</span></div><CopyBtn text={a}/></div>;})}
+                </Sec>
+                <Sec title="BDR , Acoes de Suporte">
+                  {bdr.map(function(a,i){return <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"8px 0",borderBottom:"1px solid #f1f5f9",gap:8}}><div style={{display:"flex",gap:8,flex:1}}><span style={{color:"#f59e0b",flexShrink:0,fontWeight:700}}>{">"}</span><span style={{fontSize:12,color:"#334155",lineHeight:1.5}}>{a}</span></div><CopyBtn text={a}/></div>;})}
+                </Sec>
+              </div>
+              {prazo&&<div style={{background:"rgba(16,185,129,.06)",border:"1px solid rgba(16,185,129,.2)",borderRadius:14,padding:"14px 18px",display:"flex",alignItems:"center",gap:12}}><div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#10b981,#059669)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></div><div><div style={{fontSize:9,color:"#059669",fontWeight:700,letterSpacing:1,textTransform:"uppercase",marginBottom:2}}>Prazo</div><div style={{fontSize:13,color:"#0f172a",fontWeight:600}}>{prazo}</div></div></div>}
+            </div>
+          )}
+
         </div>
       </div>
     </div>
   );
 }
+
 
 function Sec(props) {
   return (
