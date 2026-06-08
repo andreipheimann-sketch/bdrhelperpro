@@ -721,8 +721,7 @@ function AccountModal(props) {
                       <div key={i} style={{background:"#f8fafc",border:"1.5px solid #e8edf4",borderRadius:14,padding:"14px 16px",marginBottom:10}}>
                         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8,gap:8}}>
                           <div style={{fontSize:12,fontWeight:700,color:"#92400e",lineHeight:1.4,flex:1}}>{'"'+o.objecao+'"'}</div>
-                          <CopyBtn text={'"'+o.objecao+'"
--> '+o.resposta}/>
+                          <CopyBtn text={'"'+o.objecao+'"\n-> '+o.resposta}/>
                         </div>
                         <div style={{fontSize:12,color:"#334155",lineHeight:1.65}}>{"-> "+o.resposta}</div>
                       </div>
