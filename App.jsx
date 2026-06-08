@@ -685,9 +685,7 @@ function AccountModal(props) {
                             <div style={{display:"flex",alignItems:"center",gap:8,padding:"10px 14px",background:cfg.bg,borderBottom:"1px solid #e8edf4"}}>
                               <span style={{fontSize:10,fontWeight:700,color:cfg.color}}>{"Template "+(i+1)}</span>
                               {cfg.isObj&&item.assunto&&<span style={{fontSize:11,color:"#64748b",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{"- "+item.assunto}</span>}
-                              <CopyBtn text={(cfg.isObj&&item.assunto?"Assunto: "+item.assunto+"
-
-":"")+text}/>
+                              <CopyBtn text={(cfg.isObj&&item.assunto?"Assunto: "+item.assunto+"\n\n":"")+text}/>
                             </div>
                             <div style={{padding:"14px 16px",fontSize:12.5,color:"#1e293b",whiteSpace:"pre-wrap",lineHeight:1.85,borderLeft:"3px solid "+cfg.color}}>{text}</div>
                           </div>
