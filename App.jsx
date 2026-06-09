@@ -500,16 +500,23 @@ function PipelineView(props) {
   }
   function onDragOverCol(e, col) {
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
-    setDragOver(col);
+    if (dragOver !== col) setDragOver(col);
   }
-  function onDragLeaveCol() {
-    setDragOver(null);
+  function onDragLeaveCol(e, col) {
+    // Only clear if leaving the column container entirely (not entering a child)
+    var rect = e.currentTarget.getBoundingClientRect();
+    var x = e.clientX; var y = e.clientY;
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setDragOver(null);
+    }
   }
   function onDrop(e, col) {
     e.preventDefault();
-    var id = e.dataTransfer.getData("text/plain") || dragId;
-    if (id && col) {
+    e.stopPropagation();
+    var id = dragId || e.dataTransfer.getData("text/plain");
+    if (id) {
       var acc = props.accounts.find(function(a){return a.id===id;});
       if (acc && acc.status !== col) {
         props.onStatusChange(id, col);
@@ -530,7 +537,7 @@ function PipelineView(props) {
           return (
             <div key={col}
               onDragOver={function(e){onDragOverCol(e,col);}}
-              onDragLeave={onDragLeaveCol}
+              onDragLeave={function(e){onDragLeaveCol(e,col);}}
               onDrop={function(e){onDrop(e,col);}}
               style={{flex:1,minWidth:155,background:isOver?"rgba(16,185,129,.06)":"#f8fafc",borderRadius:16,padding:14,border:"1.5px solid "+(isOver?"#10b981":"#e8edf4"),transition:"all .2s cubic-bezier(.22,1,.36,1)",boxShadow:isOver?"0 0 0 3px rgba(16,185,129,.12)":"none"}}>
               <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:12}}>
@@ -544,7 +551,7 @@ function PipelineView(props) {
                   var isDragging = dragId === acc.id;
                   return (
                     <div key={acc.id}
-                      draggable="true"
+                      draggable={true}
                       onDragStart={function(e){onDragStart(e,acc.id);}}
                       onDragEnd={onDragEnd}
                       onClick={function(){if(!dragId)props.onOpen(acc);}}
@@ -588,9 +595,39 @@ function AccountModal(props) {
   var fc = FIT_CONFIG[fit] || FIT_CONFIG.ALTO;
   var sc = STATUS_CONFIG[acc.status] || STATUS_CONFIG.prospecting;
   var [activeTab, setActiveTab] = useState("overview");
+  var [enrichedContacts, setEnrichedContacts] = useState([]);
+  var [enrichedSources, setEnrichedSources] = useState([]);
+
+  // Load enriched stakeholder data from localStorage on open
+  useEffect(function() {
+    storageGet(acc.id).then(function(stored) {
+      if (stored && stored.enriched && stored.enriched.contacts) {
+        setEnrichedContacts(stored.enriched.contacts);
+        setEnrichedSources(stored.enriched.sources || []);
+      }
+    });
+    // Also try to load from acc.enriched directly if already merged
+    if (acc.enriched && acc.enriched.contacts) {
+      setEnrichedContacts(acc.enriched.contacts);
+      setEnrichedSources(acc.enriched.sources || []);
+    }
+  }, [acc.id]);
 
   function sd(path) {
     try { var parts=path.split("."); var cur=d; for(var i=0;i<parts.length;i++){cur=cur[parts[i]];if(cur==null)return null;} return cur; } catch(e){return null;}
+  }
+
+  // Merge enriched contacts into stakeholder profiles for display
+  function getEnrichedStakeholder(cargo) {
+    if (!enrichedContacts.length) return null;
+    var cargoLow = cargo.toLowerCase();
+    var keywords = cargoLow.split(/[\s\/,]+/).filter(function(w){ return w.length > 3; });
+    for (var i = 0; i < enrichedContacts.length; i++) {
+      var c = enrichedContacts[i];
+      var cLow = (c.cargo || "").toLowerCase();
+      if (keywords.some(function(w){ return cLow.includes(w); })) return c;
+    }
+    return null;
   }
 
   var tabs=[{id:"overview",label:"Visão Geral"},{id:"stakeholders",label:"Stakeholders"},{id:"messages",label:"Mensagens"},{id:"spin",label:"SPIN & Objeções"},{id:"plan",label:"Plano de Ação"}];
@@ -658,33 +695,76 @@ function AccountModal(props) {
           )}
 
           {activeTab==="stakeholders"&&(
-            <Sec title="Organograma de Stakeholders">
+            <div>
+              {enrichedContacts.length>0&&(
+                <div style={{marginBottom:20}}>
+                  <div style={{fontSize:9,fontWeight:700,letterSpacing:1.5,color:"#059669",textTransform:"uppercase",marginBottom:10,display:"flex",alignItems:"center",gap:8}}>
+                    <div style={{width:8,height:8,borderRadius:"50%",background:"#10b981",boxShadow:"0 0 8px rgba(16,185,129,.5)"}}/>
+                    {"Contatos Reais Encontrados — "+enrichedContacts.length+" perfil"+(enrichedContacts.length>1?"s":"")}
+                    {enrichedSources.map(function(s,i){return <span key={i} style={{background:"rgba(16,185,129,.08)",border:"1px solid rgba(16,185,129,.2)",color:"#059669",borderRadius:6,padding:"2px 8px",fontSize:8,fontWeight:600}}>{s}</span>;})}
+                  </div>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:10,marginBottom:16}}>
+                    {enrichedContacts.map(function(contact,i){
+                      return (
+                        <div key={i} style={{background:"linear-gradient(145deg,#f0fdf4,#fff)",border:"1.5px solid rgba(16,185,129,.25)",borderRadius:14,padding:"14px 16px"}}>
+                          <div style={{fontSize:13,fontWeight:700,color:"#0f172a",marginBottom:2}}>{contact.nome}</div>
+                          <div style={{fontSize:11,color:"#059669",marginBottom:10}}>{contact.cargo}</div>
+                          <div style={{display:"flex",flexDirection:"column",gap:5}}>
+                            {contact.email&&(
+                              <a href={"mailto:"+contact.email} style={{display:"flex",alignItems:"center",gap:6,fontSize:11,color:"#0ea5e9",textDecoration:"none",background:"rgba(14,165,233,.06)",borderRadius:6,padding:"4px 8px"}}>
+                                <span>✉</span>
+                                <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{contact.email}</span>
+                                {contact.email_confidence>0&&<span style={{fontSize:8,color:"#94a3b8",marginLeft:"auto",flexShrink:0}}>{contact.email_confidence+"%"}</span>}
+                              </a>
+                            )}
+                            {contact.linkedin&&(
+                              <a href={contact.linkedin.startsWith("http")?contact.linkedin:"https://www.linkedin.com/in/"+contact.linkedin} target="_blank" rel="noopener noreferrer"
+                                style={{display:"flex",alignItems:"center",gap:6,fontSize:11,color:"#0a66c2",textDecoration:"none",background:"rgba(10,102,194,.06)",borderRadius:6,padding:"4px 8px",fontWeight:600}}>
+                                <span>in</span><span>Ver perfil LinkedIn</span>
+                              </a>
+                            )}
+                            {contact.phone&&<span style={{fontSize:10,color:"#64748b",padding:"2px 0"}}>{contact.phone}</span>}
+                            <span style={{fontSize:8,color:"#94a3b8",fontStyle:"italic"}}>{contact.source}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              <Sec title="Mapeamento Estratégico de Cargos">
               <div className="modal-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
                 {stakeholders.map(function(s,i){
                   var pc=s.prioridade==="PRIMARIO"?"#065f46":s.prioridade==="SECUNDARIO"?"#92400e":"#475569";
                   var uc=s.urgencia==="Alta"?"#991b1b":s.urgencia==="Media"||s.urgencia==="Média"?"#92400e":"#64748b";
+                  var match=getEnrichedStakeholder(s.cargo);
                   return (
-                    <div key={i} style={{background:"#f8fafc",border:"1.5px solid #e8edf4",borderRadius:14,padding:"16px",transition:"all .2s"}}
-                      onMouseEnter={function(e){e.currentTarget.style.borderColor="#10b981";e.currentTarget.style.background="#fff";e.currentTarget.style.boxShadow="0 4px 16px rgba(16,185,129,.1)";}}
-                      onMouseLeave={function(e){e.currentTarget.style.borderColor="#e8edf4";e.currentTarget.style.background="#f8fafc";e.currentTarget.style.boxShadow="";}}>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
-                        <div style={{fontSize:13,fontWeight:700,color:"#0f172a",lineHeight:1.3,flex:1}}>{s.cargo}</div>
+                    <div key={i} style={{background:match?"linear-gradient(145deg,#f0fdf4,#fff)":"#f8fafc",border:"1.5px solid "+(match?"rgba(16,185,129,.3)":"#e8edf4"),borderRadius:14,padding:"14px 16px",transition:"all .2s"}}
+                      onMouseEnter={function(e){e.currentTarget.style.borderColor="#10b981";e.currentTarget.style.boxShadow="0 4px 16px rgba(16,185,129,.1)";}}
+                      onMouseLeave={function(e){e.currentTarget.style.borderColor=match?"rgba(16,185,129,.3)":"#e8edf4";e.currentTarget.style.boxShadow="";}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
+                        <div style={{fontSize:12.5,fontWeight:700,color:"#0f172a",lineHeight:1.3,flex:1}}>{s.cargo}</div>
                         <div style={{display:"flex",flexDirection:"column",gap:3,alignItems:"flex-end",marginLeft:8,flexShrink:0}}>
-                          <span style={{background:pc+"20",border:"1px solid "+pc,color:pc,borderRadius:6,padding:"2px 8px",fontSize:8,fontWeight:700,whiteSpace:"nowrap"}}>{s.prioridade}</span>
+                          <span style={{background:pc+"20",border:"1px solid "+pc,color:pc,borderRadius:6,padding:"2px 7px",fontSize:8,fontWeight:700,whiteSpace:"nowrap"}}>{s.prioridade}</span>
                           <span style={{fontSize:8,color:uc,fontWeight:600}}>{"Urgência: "+s.urgencia}</span>
                         </div>
                       </div>
-                      <div style={{fontSize:11.5,color:"#64748b",lineHeight:1.65,marginBottom:s.linkedin||s.email?10:0}}>{s.angulo}</div>
-                      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                        {s.linkedin&&<a href={s.linkedin.startsWith("http")?s.linkedin:"https://linkedin.com/in/"+s.linkedin} target="_blank" rel="noopener noreferrer" style={{display:"inline-flex",alignItems:"center",gap:5,fontSize:10,color:"#0a66c2",textDecoration:"none",background:"rgba(10,102,194,.07)",border:"1px solid rgba(10,102,194,.2)",borderRadius:6,padding:"4px 10px",fontWeight:600}}>{"in  Ver LinkedIn"}</a>}
-                        {s.email&&<a href={"mailto:"+s.email} style={{display:"inline-flex",alignItems:"center",gap:5,fontSize:10,color:"#0ea5e9",textDecoration:"none",background:"rgba(14,165,233,.06)",border:"1px solid rgba(14,165,233,.2)",borderRadius:6,padding:"4px 10px",fontWeight:600}}>{s.email}</a>}
-                        {s.phone&&<span style={{display:"inline-flex",alignItems:"center",fontSize:10,color:"#64748b",background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:6,padding:"4px 10px"}}>{s.phone}</span>}
-                      </div>
+                      {match&&(
+                        <div style={{background:"rgba(16,185,129,.08)",border:"1px solid rgba(16,185,129,.2)",borderRadius:8,padding:"6px 10px",marginBottom:8}}>
+                          <div style={{fontSize:11,fontWeight:700,color:"#059669",marginBottom:3}}>{"✓ Match: "+match.nome}</div>
+                          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                            {match.email&&<a href={"mailto:"+match.email} style={{fontSize:10,color:"#0ea5e9",textDecoration:"none"}}>{match.email}</a>}
+                            {match.linkedin&&<a href={match.linkedin.startsWith("http")?match.linkedin:"https://www.linkedin.com/in/"+match.linkedin} target="_blank" rel="noopener noreferrer" style={{fontSize:10,color:"#0a66c2",textDecoration:"none",fontWeight:600}}>Ver LinkedIn →</a>}
+                          </div>
+                        </div>
+                      )}
+                      <div style={{fontSize:11,color:"#64748b",lineHeight:1.6}}>{s.angulo}</div>
                     </div>
                   );
                 })}
               </div>
-            </Sec>
+              </Sec>
+            </div>
           )}
 
           {activeTab==="messages"&&(
@@ -1046,15 +1126,25 @@ function SearchView(props) {
       fetch("/api/stakeholders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({company:nome,domain:domain})})
         .then(function(r){return r.ok?r.json():null;})
         .then(function(stakhData){
-          if(!stakhData||!stakhData.contacts||!stakhData.contacts.length) return;
-          // Merge enriched contacts into the stakeholders array
+          if(!stakhData||!stakhData.contacts) return;
+          // Save enriched data alongside the account in localStorage
           storageList("acc:").then(function(keys){
             keys.forEach(function(k){
-              storageGet(k).then(function(acc){
-                if(!acc||acc.nome!==nome) return;
-                var merged = mergeStakeholders(acc.data&&acc.data.stakeholders||[], stakhData.contacts);
-                var updated = Object.assign({},acc,{data:Object.assign({},acc.data,{stakeholders:merged}),enriched:stakhData});
-                storageSet(k,updated);
+              storageGet(k).then(function(stored){
+                if(!stored||stored.nome!==nome) return;
+                var merged = mergeStakeholders(
+                  (stored.data&&stored.data.stakeholders)||[],
+                  stakhData.contacts
+                );
+                var updated = Object.assign({},stored,{
+                  data: Object.assign({},stored.data,{stakeholders:merged}),
+                  enriched: {contacts:stakhData.contacts, sources:stakhData.sources||[]}
+                });
+                storageSet(k, updated);
+                // Also update in-memory accounts list
+                setAccounts(function(prev){
+                  return prev.map(function(a){ return a.id===stored.id?updated:a; });
+                });
               });
             });
           });
