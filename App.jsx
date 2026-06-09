@@ -1662,21 +1662,7 @@ export default function App() {
     "::-webkit-scrollbar{width:5px;height:5px}",
     "::-webkit-scrollbar-track{background:#f1f5f9}",
     "::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}",
-    "@media(max-width:768px){",
-    ".app-layout{flex-direction:column!important}",
-    ".sidebar-wrapper{width:100%!important;height:56px!important;flex-direction:row!important;overflow:hidden!important;position:sticky!important;top:0!important;z-index:100!important;box-shadow:0 2px 12px rgba(15,23,42,.1)!important}",
-    ".main-content{padding:16px!important}",
-    ".g2{grid-template-columns:1fr!important}",
-    ".modal-grid{grid-template-columns:1fr!important}",
-    ".kpi-grid{grid-template-columns:1fr 1fr!important}",
-    ".chart-grid{grid-template-columns:1fr!important}",
-    ".card-grid{grid-template-columns:1fr!important}",
-    ".pipeline-scroll{overflow-x:auto!important}",
-    ".modal-box{max-width:98vw!important;margin:8px!important;border-radius:16px!important}",
-    ".modal-tabs{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}",
-    ".modal-tabs button{font-size:10px!important;padding:8px 10px!important}",
-    ".status-chips{overflow-x:auto!important}",
-    "}",
+    "@media(max-width:768px){.main-content{padding:20px!important}.g2{grid-template-columns:1fr!important}.modal-grid{grid-template-columns:1fr!important}.kpi-grid{grid-template-columns:1fr 1fr!important}.chart-grid{grid-template-columns:1fr!important}.card-grid{grid-template-columns:1fr!important}.modal-box{max-width:98vw!important;border-radius:16px!important}.modal-tabs{overflow-x:auto!important}.modal-tabs button{font-size:10px!important;padding:8px 10px!important}.status-chips{overflow-x:auto!important}.pipeline-scroll{overflow-x:auto!important}}",
     "@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}",
     "@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}50%{box-shadow:0 0 0 6px rgba(16,185,129,.1)}}",
     "@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}",
@@ -1686,7 +1672,7 @@ export default function App() {
     ".sidebar-label.visible{opacity:1;transform:translateX(0)}",
     ".toggle-btn{transition:all .25s cubic-bezier(.22,1,.36,1)}",
     ".toggle-btn:hover{background:rgba(16,185,129,.1) !important}",
-    "@media(max-width:768px){.sidebar-auto{width:60px !important}}",
+
     ".card-hover{transition:all .25s cubic-bezier(.22,1,.36,1)}",
     ".card-hover:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(15,23,42,.12)}",
     ".glass{background:rgba(255,255,255,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}",
@@ -1705,10 +1691,10 @@ export default function App() {
   ];
 
   return (
-    <div className="app-layout" style={{display:"flex",height:"100vh",background:"#f8fafc",overflow:"hidden"}}>
+    <div style={{display:"flex",height:"100vh",background:"#f8fafc",overflow:"hidden"}}>
       <style>{css}</style>
 
-      <div className="sidebar sidebar-wrapper" style={{width:sidebarOpen?224:64,background:"#fff",borderRight:"1px solid #e8edf4",display:"flex",flexDirection:"column",flexShrink:0,boxShadow:"4px 0 24px rgba(15,23,42,.06)",position:"relative",overflow:"hidden"}}>
+      <div className="sidebar" style={{width:sidebarOpen?224:64,background:"#fff",borderRight:"1px solid #e8edf4",display:"flex",flexDirection:"column",flexShrink:0,boxShadow:"4px 0 24px rgba(15,23,42,.06)",position:"relative",overflow:"hidden"}}>
         <div style={{height:3,background:"linear-gradient(90deg,#10b981,#0ea5e9,#8b5cf6)",flexShrink:0}}/>
 
         {sidebarOpen ? (
