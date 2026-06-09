@@ -482,64 +482,88 @@ function AccountCard(props) {
 
 // ── PIPELINE VIEW ─────────────────────────────────────────────────────────────
 function PipelineView(props) {
+  var dragState = useRef({active:false, id:null, fromCol:null});
+  var [overCol, setOverCol] = useState(null);
   var [dragId, setDragId] = useState(null);
-  var [dragOver, setDragOver] = useState(null);
+  var colRefs = useRef({});
+  var containerRef = useRef(null);
 
-  function onDragStart(e, accId) {
+  function getColAtPoint(x, y) {
+    var found = null;
+    Object.keys(colRefs.current).forEach(function(col) {
+      var el = colRefs.current[col];
+      if (!el) return;
+      var r = el.getBoundingClientRect();
+      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) found = col;
+    });
+    return found;
+  }
+
+  function startDrag(accId, fromCol) {
+    dragState.current = {active:true, id:accId, fromCol:fromCol};
     setDragId(accId);
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", accId);
-    e.currentTarget.style.opacity = "0.4";
-    e.currentTarget.style.transform = "rotate(2deg) scale(0.97)";
+    setOverCol(fromCol);
   }
-  function onDragEnd(e) {
-    setDragId(null);
-    setDragOver(null);
-    e.currentTarget.style.opacity = "";
-    e.currentTarget.style.transform = "";
-  }
-  function onDragOverCol(e, col) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.dataTransfer.dropEffect = "move";
-    if (dragOver !== col) setDragOver(col);
-  }
-  function onDragLeaveCol(e, col) {
-    // Only clear if leaving the column container entirely (not entering a child)
-    var rect = e.currentTarget.getBoundingClientRect();
-    var x = e.clientX; var y = e.clientY;
-    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
-      setDragOver(null);
+  function endDrag(x, y) {
+    if (!dragState.current.active) return;
+    var col = getColAtPoint(x, y);
+    if (col && col !== dragState.current.fromCol) {
+      props.onStatusChange(dragState.current.id, col);
     }
-  }
-  function onDrop(e, col) {
-    e.preventDefault();
-    e.stopPropagation();
-    var id = dragId || e.dataTransfer.getData("text/plain");
-    if (id) {
-      var acc = props.accounts.find(function(a){return a.id===id;});
-      if (acc && acc.status !== col) {
-        props.onStatusChange(id, col);
-      }
-    }
+    dragState.current = {active:false, id:null, fromCol:null};
     setDragId(null);
-    setDragOver(null);
+    setOverCol(null);
+  }
+
+  // Mouse events
+  function onMouseDown(e, accId, fromCol) {
+    e.preventDefault();
+    startDrag(accId, fromCol);
+    function onMove(ev) {
+      if (!dragState.current.active) return;
+      var col = getColAtPoint(ev.clientX, ev.clientY);
+      setOverCol(col || dragState.current.fromCol);
+    }
+    function onUp(ev) {
+      endDrag(ev.clientX, ev.clientY);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    }
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }
+
+  // Touch events
+  function onTouchStart(e, accId, fromCol) {
+    startDrag(accId, fromCol);
+    function onMove(ev) {
+      if (!dragState.current.active || !ev.touches[0]) return;
+      var t = ev.touches[0];
+      var col = getColAtPoint(t.clientX, t.clientY);
+      setOverCol(col || dragState.current.fromCol);
+    }
+    function onEnd(ev) {
+      var t = ev.changedTouches[0];
+      if (t) endDrag(t.clientX, t.clientY);
+      else { dragState.current={active:false,id:null,fromCol:null}; setDragId(null); setOverCol(null); }
+      e.target.removeEventListener("touchmove", onMove);
+      e.target.removeEventListener("touchend", onEnd);
+    }
+    e.target.addEventListener("touchmove", onMove, {passive:true});
+    e.target.addEventListener("touchend", onEnd);
   }
 
   return (
-    <div className="pipeline-scroll" style={{overflowX:"auto",paddingBottom:16}}>
+    <div ref={containerRef} className="pipeline-scroll" style={{overflowX:"auto",paddingBottom:16,userSelect:"none"}}>
       <div style={{display:"flex",gap:14,minWidth:900}}>
         {STATUS_ORDER.map(function(col) {
           var sc = STATUS_CONFIG[col];
           var cards = props.accounts.filter(function(a){return a.status===col;});
-          var isOver = dragOver === col;
-          var isDraggingHere = dragId && cards.some(function(a){return a.id===dragId;});
+          var isOver = overCol===col && dragState.current.fromCol!==col;
           return (
             <div key={col}
-              onDragOver={function(e){onDragOverCol(e,col);}}
-              onDragLeave={function(e){onDragLeaveCol(e,col);}}
-              onDrop={function(e){onDrop(e,col);}}
-              style={{flex:1,minWidth:155,background:isOver?"rgba(16,185,129,.06)":"#f8fafc",borderRadius:16,padding:14,border:"1.5px solid "+(isOver?"#10b981":"#e8edf4"),transition:"all .2s cubic-bezier(.22,1,.36,1)",boxShadow:isOver?"0 0 0 3px rgba(16,185,129,.12)":"none"}}>
+              ref={function(el){colRefs.current[col]=el;}}
+              style={{flex:1,minWidth:155,background:isOver?"rgba(16,185,129,.06)":"#f8fafc",borderRadius:16,padding:14,border:"1.5px solid "+(isOver?"#10b981":"#e8edf4"),transition:"border-color .15s,background .15s",boxShadow:isOver?"0 0 0 3px rgba(16,185,129,.15)":"none"}}>
               <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:12}}>
                 <div style={{width:8,height:8,borderRadius:"50%",background:sc.color}}/>
                 <div style={{fontSize:9,fontWeight:700,color:sc.color,textTransform:"uppercase",letterSpacing:.8}}>{sc.label}</div>
@@ -547,21 +571,20 @@ function PipelineView(props) {
               </div>
               <div style={{display:"flex",flexDirection:"column",gap:8,minHeight:60}}>
                 {cards.map(function(acc) {
-                  var fc = FIT_CONFIG[acc.fit] || FIT_CONFIG.ALTO;
-                  var isDragging = dragId === acc.id;
+                  var fc = FIT_CONFIG[acc.fit]||FIT_CONFIG.ALTO;
+                  var isDragging = dragId===acc.id;
                   return (
                     <div key={acc.id}
-                      draggable={true}
-                      onDragStart={function(e){onDragStart(e,acc.id);}}
-                      onDragEnd={onDragEnd}
+                      onMouseDown={function(e){onMouseDown(e,acc.id,col);}}
+                      onTouchStart={function(e){onTouchStart(e,acc.id,col);}}
                       onClick={function(){if(!dragId)props.onOpen(acc);}}
-                      style={{background:"#fff",border:"1px solid "+(isDragging?"#10b981":"#edf0f7"),borderRadius:14,padding:"12px 14px",cursor:"grab",transition:"box-shadow .2s,border-color .2s",boxShadow:"0 1px 4px rgba(15,23,42,.05)",userSelect:"none",opacity:isDragging?0.4:1}}>
+                      style={{background:"#fff",border:"1px solid "+(isDragging?"#10b981":"#edf0f7"),borderRadius:14,padding:"12px 14px",cursor:isDragging?"grabbing":"grab",touchAction:"none",boxShadow:isDragging?"0 8px 24px rgba(16,185,129,.2)":"0 1px 4px rgba(15,23,42,.05)",opacity:isDragging?0.5:1,transform:isDragging?"rotate(2deg) scale(.96)":"none",transition:isDragging?"none":"all .2s",position:"relative"}}>
                       <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:3}}>
                         <div style={{fontSize:12,fontWeight:700,color:"#0f172a",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{acc.nome}</div>
-                        <div style={{fontSize:14,color:"#cbd5e1",marginLeft:6,flexShrink:0,lineHeight:1}}>⠿</div>
+                        <div style={{fontSize:13,color:"#cbd5e1",marginLeft:6,flexShrink:0}}>⠿</div>
                       </div>
                       <div style={{fontSize:10,color:"#94a3b8",marginBottom:8,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{acc.setor}</div>
-                      <div style={{display:"flex",gap:5,alignItems:"center"}}>
+                      <div style={{display:"flex",gap:5}}>
                         <span style={{background:fc.bg,border:"1px solid "+fc.border,color:fc.text,borderRadius:6,padding:"2px 7px",fontSize:8,fontWeight:700}}>{"FIT "+acc.fit}</span>
                         <span style={{fontSize:8,color:TIER_COLOR[acc.tier]||"#94a3b8",fontWeight:700}}>{acc.tier}</span>
                       </div>
@@ -569,7 +592,7 @@ function PipelineView(props) {
                   );
                 })}
                 {cards.length===0&&(
-                  <div style={{textAlign:"center",padding:"28px 8px",color:isOver?"#10b981":"#cbd5e1",fontSize:11,border:"2px dashed "+(isOver?"#10b981":"#e8edf4"),borderRadius:10,transition:"all .2s"}}>
+                  <div style={{textAlign:"center",padding:"28px 8px",color:isOver?"#059669":"#cbd5e1",fontSize:11,border:"2px dashed "+(isOver?"#10b981":"#e8edf4"),borderRadius:10,transition:"all .15s",fontWeight:isOver?600:400}}>
                     {isOver?"Soltar aqui":"Vazio"}
                   </div>
                 )}
@@ -578,11 +601,7 @@ function PipelineView(props) {
           );
         })}
       </div>
-      {dragId && (
-        <div style={{marginTop:12,textAlign:"center",fontSize:11,color:"#94a3b8"}}>
-          Arraste para outra coluna para mover o card
-        </div>
-      )}
+      {dragId&&<div style={{marginTop:10,textAlign:"center",fontSize:11,color:"#94a3b8"}}>Segure e arraste para outra coluna</div>}
     </div>
   );
 }
@@ -1000,6 +1019,7 @@ function SearchView(props) {
   var [loading, setLoading] = useState(false);
   var [done, setDone] = useState(null);
   var [searchError, setSearchError] = useState("");
+  var [duplicate, setDuplicate] = useState(null);
 
   function isUrl(v) { return /^https?:\/\//i.test(v) || /^www\./.test(v); }
 
@@ -1113,50 +1133,53 @@ function SearchView(props) {
     if (!inputVal.trim() || loading) return;
     var nome = inputVal.trim();
     var domain = extractDomain(nome);
+
+    // Check in-memory for duplicate first (instant, no async needed)
+    var nomeLower = nome.toLowerCase().trim();
+    if (props.accounts) {
+      var dup = props.accounts.find(function(a){ return a.nome && a.nome.toLowerCase().trim() === nomeLower; });
+      if (dup) { setDuplicate(dup); setInputVal(""); return; }
+    }
+
     setLoading(true); setDone(null); setSearchError("");
-    fetch("/api/search", {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({company:nome, context:""})
-    })
-    .then(function(r){ if(!r.ok) return r.json().then(function(j){throw new Error(j.error||"HTTP "+r.status);}); return r.json(); })
-    .then(function(resp){
-      var data = buildData(nome, resp.results);
-      props.onSave(nome, data, true);
-      // Enrich stakeholders and merge into saved account
-      fetch("/api/stakeholders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({company:nome,domain:domain})})
+
+    function doEnrich(n, d) {
+      fetch("/api/stakeholders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({company:n,domain:d})})
         .then(function(r){return r.ok?r.json():null;})
         .then(function(stakhData){
-          if(!stakhData||!stakhData.contacts) return;
-          // Save enriched data alongside the account in localStorage
+          if(!stakhData||!stakhData.contacts||!stakhData.contacts.length) return;
           storageList("acc:").then(function(keys){
             keys.forEach(function(k){
               storageGet(k).then(function(stored){
-                if(!stored||stored.nome!==nome) return;
-                var merged = mergeStakeholders(
-                  (stored.data&&stored.data.stakeholders)||[],
-                  stakhData.contacts
-                );
+                if(!stored||stored.nome.toLowerCase()!==n.toLowerCase()) return;
+                var merged = mergeStakeholders((stored.data&&stored.data.stakeholders)||[], stakhData.contacts);
                 var updated = Object.assign({},stored,{
-                  data: Object.assign({},stored.data,{stakeholders:merged}),
-                  enriched: {contacts:stakhData.contacts, sources:stakhData.sources||[]}
+                  data:Object.assign({},stored.data,{stakeholders:merged}),
+                  enriched:{contacts:stakhData.contacts,sources:stakhData.sources||[]}
                 });
                 storageSet(k, updated);
-                // Also update in-memory accounts list
-                setAccounts(function(prev){
-                  return prev.map(function(a){ return a.id===stored.id?updated:a; });
-                });
+                if(props.onUpdateAccount) props.onUpdateAccount(updated);
               });
             });
           });
         }).catch(function(){});
-      setLoading(false); setDone(nome); setInputVal("");
-    })
-    .catch(function(e){
-      var data = buildData(nome, null);
-      props.onSave(nome, data, false);
-      setLoading(false); setDone(nome); setInputVal("");
-      setSearchError("Busca online indisponivel. Account mapping gerado com base de conhecimento.");
-    });
+    }
+
+    fetch("/api/search", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({company:nome,context:""})})
+      .then(function(r){ if(!r.ok) return r.json().then(function(j){throw new Error(j.error||"HTTP "+r.status);}); return r.json(); })
+      .then(function(resp){
+        var data = buildData(nome, resp.results);
+        props.onSave(nome, data, true);
+        doEnrich(nome, domain);
+        setLoading(false); setDone(nome); setInputVal("");
+      })
+      .catch(function(){
+        var data = buildData(nome, null);
+        props.onSave(nome, data, false);
+        doEnrich(nome, domain);
+        setLoading(false); setDone(nome); setInputVal("");
+        setSearchError("Busca online indisponivel. Account mapping gerado com base de conhecimento.");
+      });
   }
 
 
@@ -1181,8 +1204,25 @@ function SearchView(props) {
         {searchError && (
           <div style={{marginTop:14,background:"#fffbeb",border:"1px solid #fde68a",borderRadius:12,padding:"12px 16px",fontSize:12,color:"#92400e"}}>{searchError}</div>
         )}
+
         {searchError && (
           <div style={{marginTop:12,background:"#fffbeb",border:"1px solid #fde68a",borderRadius:12,padding:"12px 16px",fontSize:12,color:"#92400e"}}>{searchError}</div>
+        )}
+        {duplicate && (
+          <div style={{marginTop:14,background:"#fff7ed",border:"1.5px solid #fb923c",borderRadius:14,padding:"14px 18px"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10}}>
+              <div>
+                <div style={{fontSize:13,fontWeight:700,color:"#9a3412",marginBottom:3}}>{"Conta já mapeada: "+duplicate.nome}</div>
+                <div style={{fontSize:11,color:"#c2410c"}}>{duplicate.setor + " — " + (STATUS_CONFIG[duplicate.status]&&STATUS_CONFIG[duplicate.status].label)}</div>
+              </div>
+              <div style={{display:"flex",gap:8}}>
+                <button onClick={function(){props.onOpenAccount(duplicate);}} style={{background:"#ea580c",color:"#fff",border:"none",borderRadius:10,padding:"8px 16px",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>
+                  Ver mapeamento
+                </button>
+                <button onClick={function(){setDuplicate(null);}} style={{background:"none",border:"1px solid #fb923c",color:"#ea580c",borderRadius:10,padding:"8px 12px",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>x</button>
+              </div>
+            </div>
+          </div>
         )}
         {done && (
           <div style={{marginTop:14,display:"flex",alignItems:"center",gap:10,background:"#f0fdf4",border:"1px solid #86efac",borderRadius:12,padding:"12px 16px",fontSize:13,color:"#065f46",fontWeight:600}}>
@@ -1192,9 +1232,9 @@ function SearchView(props) {
         )}
       </div>
 
-      <div style={{background:"linear-gradient(160deg,#f0fdf8 0%,#fff 60%)",border:"1px solid rgba(16,185,129,.2)",borderRadius:20,padding:"28px 32px",marginBottom:24,position:"relative",overflow:"hidden"}}>
-        <div style={{fontSize:10,fontWeight:700,color:"#10b981",letterSpacing:2,textTransform:"uppercase",marginBottom:20}}>Como funciona a V3</div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:20}}>
+      <div style={{background:"linear-gradient(160deg,#f0fdf8 0%,#fff 60%)",border:"1px solid rgba(16,185,129,.2)",borderRadius:20,padding:"20px 24px",marginBottom:24,position:"relative",overflow:"hidden"}}>
+        <div style={{fontSize:10,fontWeight:700,color:"#10b981",letterSpacing:2,textTransform:"uppercase",marginBottom:16}}>Como funciona o BDR Helper Pro V1</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:14}}>
           {[
             {n:"1",title:"Busca",desc:"Analise qualquer empresa e gere o account mapping completo com fit, dores, stakeholders e mensagens."},
             {n:"2",title:"Contas",desc:"Todas as empresas ficam salvas com status de prospecção. Nunca refaça uma busca, o histórico é permanente."},
@@ -1203,9 +1243,11 @@ function SearchView(props) {
           ].map(function(item) {
             return (
               <div key={item.n}>
-                <div style={{width:28,height:28,borderRadius:8,background:"rgba(16,185,129,.1)",border:"1px solid rgba(16,185,129,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,color:"#059669",marginBottom:10}}>{item.n}</div>
-                <div style={{fontSize:13,fontWeight:700,color:"#0f172a",marginBottom:5}}>{item.title}</div>
-                <div style={{fontSize:11.5,color:"#64748b",lineHeight:1.6}}>{item.desc}</div>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                  <div style={{width:24,height:24,borderRadius:7,background:"rgba(16,185,129,.1)",border:"1px solid rgba(16,185,129,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:"#059669",flexShrink:0}}>{item.n}</div>
+                  <div style={{fontSize:12.5,fontWeight:700,color:"#0f172a"}}>{item.title}</div>
+                </div>
+                <div style={{fontSize:11,color:"#64748b",lineHeight:1.55}}>{item.desc}</div>
               </div>
             );
           })}
@@ -1866,7 +1908,7 @@ export default function App() {
             </div>
           ) : (
             <div style={{animation:"fadeUp .35s ease"}}>
-              {nav==="search"    && <SearchView onSave={saveAccount}/>}
+              {nav==="search"    && <SearchView accounts={accounts} onSave={saveAccount} onOpenAccount={function(acc){setOpenAcc(acc);}} onUpdateAccount={function(updated){setAccounts(function(prev){return prev.map(function(a){return a.id===updated.id?updated:a;});});}}/>}
               {nav==="accounts"  && <AccountsView accounts={accounts} onOpen={setOpenAcc} onStatusChange={updateStatus} onDelete={deleteAccount}/>}
               {nav==="sequences" && <SequenceView accounts={accounts} showToast={showToast}/>}
               {nav==="relatorios"&& <InsightsView accounts={accounts}/>}
