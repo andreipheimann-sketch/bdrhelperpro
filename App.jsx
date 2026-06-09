@@ -19,11 +19,10 @@ var STATUS_CONFIG = {
   "prospecting": { label:"Em prospecção", color:"#64748b", bg:"#f8fafc", border:"#e2e8f0" },
   "contacted":   { label:"Contatado",     color:"#0369a1", bg:"#eff6ff", border:"#bfdbfe" },
   "meeting":     { label:"Reunião",       color:"#7c3aed", bg:"#f5f3ff", border:"#ddd6fe" },
-  "proposal":    { label:"Proposta",      color:"#b45309", bg:"#fffbeb", border:"#fde68a" },
-  "won":         { label:"Ganho",         color:"#065f46", bg:"#f0fdf4", border:"#bbf7d0" },
+  "won":         { label:"Convertido",    color:"#065f46", bg:"#f0fdf4", border:"#bbf7d0" },
   "lost":        { label:"Perdido",       color:"#991b1b", bg:"#fff1f2", border:"#fecdd3" },
 };
-var STATUS_ORDER = ["prospecting","contacted","meeting","proposal","won","lost"];
+var STATUS_ORDER = ["prospecting","contacted","meeting","won","lost"];
 var FIT_CONFIG = {
   "ALTO":  { bg:"#dcfce7", border:"#10b981", text:"#065f46" },
   "MEDIO": { bg:"#fef3c7", border:"#f59e0b", text:"#92400e" },
@@ -55,40 +54,40 @@ var SEQUENCE_TEMPLATES = {
     { day:1,  type:"linkedin", subject:"Seguranca de aplicações na {empresa}", body:"Ola, tudo bem?\n\nVi que {empresa} tem uma operacao digital expressiva no setor de {setor}. Como CISO, sei que voce equilibra diariamente a pressao por seguranca com a velocidade do time de produto.\n\nEmpresa similar a de voces reduziu vulnerabilidades críticas em producao em 70% e acelerou a certificação ISO 27001 em 60% com a Conviso Platform.\n\nFaz sentido um papo de 20 minutos para eu entender como esta o processo de AppSec de voces hoje?\n\nAbraço,\nAndrei Heimann | AE Enterprise - Conviso Application Security" },
     { day:3,  type:"email",    subject:"[{empresa}] ROI de AppSec, calculo rápido", body:"Ola,\n\nUma pergunta direta: qual e o custo estimado de remediação de uma vulnerabilidade crítica descoberta em producao na {empresa}, considerando horas de engenharia, rollback e risco regulatório?\n\nNa media dos nossos clientes no setor de {setor}, esse custo e 6x maior do que se detectada durante o desenvolvimento.\n\nConsigo te mostrar em 15 minutos como empresas similares estruturaram AppSec para pagar esse custo antecipado, e com ROI positivo no primeiro trimestre.\n\nTem disponibilidade essa semana?\n\nAbraço,\nAndrei Heimann\nAccount Executive | Conviso Application Security\n(51) 99436-7667" },
     { day:6,  type:"call",    subject:"Abertura cold call, CISO {empresa}", body:"Bom dia [Nome], aqui e o Andrei da Conviso Application Security. Tenho 30 segundos?\n\n[PAUSA]\n\nPerfeito. Ligo porque {empresa} tem o perfil exato de empresa onde a Conviso gera mais impacto, time de engenharia ativo em {setor}, com pressao crescente por AppSec formal de clientes e reguladores.\n\nEmpresa similar reduziu 70% das vulnerabilidades críticas e acelerou ISO 27001 em 60%. Faz sentido eu te mostrar como funcionou? Quando voce tem 20 minutos essa semana?" },
-    { day:10, type:"email",    subject:"[{empresa}] Case: ISO 27001 em 60% menos tempo", body:"Ola,\n\nRecentemente ajudamos uma empresa do setor de {setor} com perfil muito similar ao da {empresa} a:\n\n- Integrar SAST e DAST no pipeline CI/CD em 2 semanas\n- Zerar vulnerabilidades críticas em producao nos primeiros 90 dias\n- Reduzir em 60% o tempo para certificação ISO 27001\n- Criar um programa Security Champions escalavel\n\nO time de engenharia nao precisou parar o roadmap, o nosso CS conduziu tudo.\n\nFaz sentido eu te contar como funcionou? 20 minutos essa semana.\n\nAbraço,\nAndrei Heimann | Conviso Application Security" },
-    { day:15, type:"linkedin", subject:"Atualização rápida, {empresa}", body:"Ola,\n\nMandei um email semana passada sobre AppSec e redução de vulnerabilidades na {empresa}, mas imagino que a caixa de entrada esta cheia.\n\nDeixo uma pergunta direta: voces estao em algum processo de certificação ISO 27001, SOC 2 ou PCI-DSS nos próximos 12 meses?\n\nSe sim, vale muito uma conversa antes, posso mostrar como estruturar AppSec para acelerar esse processo. Se nao, entendo e nao incomodo mais.\n\nAbraço,\nAndrei" },
-    { day:21, type:"breakup",  subject:"Última mensagem, {empresa}", body:"Ola,\n\nVou respeitar o seu tempo, essa e minha última mensagem sobre o tema.\n\nSe AppSec nao e prioridade agora na {empresa}, faz todo sentido. Mas se em algum momento a conversa sobre ISO 27001, custo de vulnerabilidades ou exigencia de clientes enterprise ganhar urgencia, pode me chamar.\n\nGuardo a {empresa} no radar e fico a disposicao.\n\nAbraço,\nAndrei Heimann | Conviso Application Security\n(51) 99436-7667" },
+    { day:10, type:"email",    subject:"[{empresa}] Case: ISO 27001 em 60% menos tempo", body:"Ola,\n\nRecentemente ajudamos uma empresa do setor de {setor} com perfil muito similar ao da {empresa} a:\n\n- Integrar SAST e DAST no pipeline CI/CD em 2 semanas\n- Zerar vulnerabilidades críticas em producao nos primeiros 90 dias\n- Reduzir em 60% o tempo para certificação ISO 27001\n- Criar um programa Security Champions escalavel\n\nO time de engenharia não precisou parar o roadmap, o nosso CS conduziu tudo.\n\nFaz sentido eu te contar como funcionou? 20 minutos essa semana.\n\nAbraço,\nAndrei Heimann | Conviso Application Security" },
+    { day:15, type:"linkedin", subject:"Atualização rápida, {empresa}", body:"Ola,\n\nMandei um email semana passada sobre AppSec e redução de vulnerabilidades na {empresa}, mas imagino que a caixa de entrada esta cheia.\n\nDeixo uma pergunta direta: voces estao em algum processo de certificação ISO 27001, SOC 2 ou PCI-DSS nos próximos 12 meses?\n\nSe sim, vale muito uma conversa antes, posso mostrar como estruturar AppSec para acelerar esse processo. Se não, entendo e não incomodo mais.\n\nAbraço,\nAndrei" },
+    { day:21, type:"breakup",  subject:"Última mensagem, {empresa}", body:"Ola,\n\nVou respeitar o seu tempo, essa e minha última mensagem sobre o tema.\n\nSe AppSec não e prioridade agora na {empresa}, faz todo sentido. Mas se em algum momento a conversa sobre ISO 27001, custo de vulnerabilidades ou exigencia de clientes enterprise ganhar urgencia, pode me chamar.\n\nGuardo a {empresa} no radar e fico a disposicao.\n\nAbraço,\nAndrei Heimann | Conviso Application Security\n(51) 99436-7667" },
   ],
   cto: [
     { day:1,  type:"linkedin", subject:"Pipeline de seguranca na {empresa}", body:"Ola, tudo bem?\n\nVi que {empresa} tem um time de engenharia ativo em {setor}. Como CTO, imagino que voce equilibra velocidade de entrega com qualidade e seguranca do codigo.\n\nUma pergunta direta: voces tem algum processo automatizado de SAST ou analise de vulnerabilidades integrado ao pipeline hoje?\n\nPergunto porque vi empresas similares perdendo 40% do tempo do time de seguranca em analise manual, e resolvendo isso com uma integração de 2 semanas.\n\nVale um papo?" },
-    { day:3,  type:"email",    subject:"[{empresa}] Seguranca no CI/CD sem travar o roadmap", body:"Ola,\n\nO maior medo de CTOs quando o assunto e AppSec e friccao no pipeline de desenvolvimento. Entendo.\n\nA Conviso Platform integra com GitHub, GitLab e Azure DevOps em media em 2 semanas, sem impactar o roadmap do time. O resultado que vemos em empresas de {setor}:\n\n- SAST rodando automaticamente em cada PR\n- Vulnerabilidades priorizadas por risco de negocio (nao lista infinita de falsos positivos)\n- Security Champions: devs como multiplicadores de seguranca\n\nConsigo te mostrar como funciona na pratica em 20 minutos. Tem disponibilidade?\n\nAbraço,\nAndrei Heimann | Conviso Application Security" },
+    { day:3,  type:"email",    subject:"[{empresa}] Seguranca no CI/CD sem travar o roadmap", body:"Ola,\n\nO maior medo de CTOs quando o assunto e AppSec e friccao no pipeline de desenvolvimento. Entendo.\n\nA Conviso Platform integra com GitHub, GitLab e Azure DevOps em media em 2 semanas, sem impactar o roadmap do time. O resultado que vemos em empresas de {setor}:\n\n- SAST rodando automaticamente em cada PR\n- Vulnerabilidades priorizadas por risco de negocio (não lista infinita de falsos positivos)\n- Security Champions: devs como multiplicadores de seguranca\n\nConsigo te mostrar como funciona na pratica em 20 minutos. Tem disponibilidade?\n\nAbraço,\nAndrei Heimann | Conviso Application Security" },
     { day:7,  type:"whatsapp", subject:"WhatsApp, CTO {empresa}", body:"Oi [Nome], tudo bem? Sou o Andrei da Conviso Application Security.\n\nVi que {empresa} tem um time de engenharia relevante em {setor}. Mando uma pergunta direta: voces tem SAST ou analise de dependencias rodando no pipeline hoje?\n\nTenho um case de empresa similar que pode ser relevante. Posso te mandar?" },
     { day:12, type:"email",    subject:"[{empresa}] O que acontece quando uma vuln chega em producao?", body:"Ola,\n\nUma situação que todo CTO conhece: a equipe de seguranca encontra uma vulnerabilidade crítica em producao. O que acontece?\n\nRollback urgente. Horas de engenharia desviadas. Comunicacao com clientes. Risco regulatorio.\n\nO custo medio de remediar uma vulnerabilidade em producao e 6x maior do que no desenvolvimento. Na pratica, isso significa que prevenir com SAST no pipeline e mais barato do que qualquer incidente.\n\nConsigo te mostrar como {empresa} poderia estruturar isso em 2 semanas. Vale 20 minutos?\n\nAbraço,\nAndrei | Conviso Application Security" },
-    { day:17, type:"call",    subject:"Abertura cold call, CTO {empresa}", body:"Ola [Nome], Andrei da Conviso Application Security. Vou ser rápido.\n\nLigo porque {empresa} apareceu no nosso radar como empresa com time de dev ativo em {setor}. Uma pergunta tecnica: como esta estruturado hoje o processo de identificacao de vulnerabilidades no pipeline de voces?\n\n[OUCAR RESPOSTA]\n\nEntendi. E quando voce descobre uma vulnerabilidade crítica, qual e o processo de priorização e correcao que voces seguem hoje?" },
-    { day:22, type:"breakup",  subject:"Encerrando contato, {empresa}", body:"Ola,\n\nFiz algumas tentativas de contato sobre seguranca de aplicações na {empresa} e imagino que ou nao e o momento certo, ou nao sou a pessoa certa para falar sobre isso.\n\nVou encerrar o contato por aqui. Se algum dia o tema de AppSec, ISO 27001 ou vulnerabilidades em producao ganhar urgencia, pode me chamar, guardo {empresa} no radar.\n\nAbraço e sucesso!\nAndrei Heimann | Conviso Application Security" },
+    { day:17, type:"call",    subject:"Abertura cold call, CTO {empresa}", body:"Ola [Nome], Andrei da Conviso Application Security. Vou ser rápido.\n\nLigo porque {empresa} apareceu no nosso radar como empresa com time de dev ativo em {setor}. Uma pergunta tecnica: como esta estruturado hoje o processo de identificacao de vulnerabilidades no pipeline de voces?\n\n[OUCAR RESPOSTA]\n\nEntendi. E quando voce descobre uma vulnerabilidade crítica, qual e o processo de priorização e correção que voces seguem hoje?" },
+    { day:22, type:"breakup",  subject:"Encerrando contato, {empresa}", body:"Ola,\n\nFiz algumas tentativas de contato sobre seguranca de aplicações na {empresa} e imagino que ou não e o momento certo, ou não sou a pessoa certa para falar sobre isso.\n\nVou encerrar o contato por aqui. Se algum dia o tema de AppSec, ISO 27001 ou vulnerabilidades em producao ganhar urgencia, pode me chamar, guardo {empresa} no radar.\n\nAbraço e sucesso!\nAndrei Heimann | Conviso Application Security" },
   ],
   eng: [
     { day:1,  type:"linkedin", subject:"Security Champions na {empresa}", body:"Ola, tudo bem?\n\nVi que {empresa} tem times de engenharia ativos em {setor}. Uma pergunta rápida: voces tem devs atuando como Security Champions hoje?\n\nPergunto porque empresas similares estao vendo um resultado interessante ao capacitar engineers para identificar vulnerabilidades na origem, sem depender exclusivamente do time de segurança.\n\nTenho um material relevante sobre o tema. Vale trocar uma ideia?" },
-    { day:4,  type:"email",    subject:"[{empresa}] Redução de falsos positivos no pipeline", body:"Ola,\n\nA reclamacao mais comum de engineering managers sobre ferramentas de seguranca: lista infinita de alertas, 80% falsos positivos, time que ignora tudo.\n\nA Conviso Platform funciona diferente, prioriza vulnerabilidades por risco real de negocio, nao apenas pela classificacao tecnica. O resultado: o time foca nos 20% que importam.\n\nConsigo te mostrar como funciona na pratica em 15 minutos. Pode ser essa semana?\n\nAbraço,\nAndrei Heimann | Conviso Application Security" },
-    { day:8,  type:"whatsapp", subject:"WhatsApp, Eng Manager {empresa}", body:"Oi [Nome], Andrei da Conviso AppSec.\n\nDireto ao ponto: sua equipe de engenharia na {empresa} ja tem SAST ou analise de dependencias integrado ao CI/CD?\n\nSe nao, tenho um case de como integrar em 2 semanas sem travar o roadmap. Vale ver?" },
+    { day:4,  type:"email",    subject:"[{empresa}] Redução de falsos positivos no pipeline", body:"Ola,\n\nA reclamacao mais comum de engineering managers sobre ferramentas de seguranca: lista infinita de alertas, 80% falsos positivos, time que ignora tudo.\n\nA Conviso Platform funciona diferente, prioriza vulnerabilidades por risco real de negocio, não apenas pela classificacao tecnica. O resultado: o time foca nos 20% que importam.\n\nConsigo te mostrar como funciona na pratica em 15 minutos. Pode ser essa semana?\n\nAbraço,\nAndrei Heimann | Conviso Application Security" },
+    { day:8,  type:"whatsapp", subject:"WhatsApp, Eng Manager {empresa}", body:"Oi [Nome], Andrei da Conviso AppSec.\n\nDireto ao ponto: sua equipe de engenharia na {empresa} ja tem SAST ou analise de dependencias integrado ao CI/CD?\n\nSe não, tenho um case de como integrar em 2 semanas sem travar o roadmap. Vale ver?" },
     { day:14, type:"email",    subject:"[{empresa}] 2 semanas para AppSec no pipeline", body:"Ola,\n\nSei que a agenda de um engineering manager e lotada, por isso vou ser objetivo.\n\nO que a Conviso entrega para times de engenharia como o da {empresa}:\n\n- SAST integrado ao GitHub/GitLab em 2 semanas\n- Zero impacto no roadmap atual (o nosso CS conduz)\n- Alertas priorizados por risco, sem lista infinita de falsos positivos\n- Programa Security Champions: seus devs como multiplicadores de seguranca\n\nFaz sentido ver uma demo de 20 minutos focada no stack de voces?\n\nAbraço,\nAndrei" },
-    { day:19, type:"follow",   subject:"[{empresa}] Última tentativa, integração gratuita por 30 dias", body:"Ola,\n\nÚltima mensagem sobre o tema, prometo.\n\nEm vez de mais uma conversa, proponho algo diferente: 30 dias gratuitos da Conviso Platform integrada ao pipeline de voces. Sem compromisso.\n\nVoces veem o resultado na pratica, vulnerabilidades identificadas, priorização por risco, o time funcionando. Se nao fizer sentido, sem custo e sem pressao.\n\nVale arriscar 2 semanas de integração?" },
-    { day:25, type:"breakup",  subject:"Encerrando, {empresa}", body:"Ola,\n\nNao quero continuar incomodando. Encerro o contato por aqui.\n\nSe algum dia a conversa sobre AppSec no pipeline ganhar espaco, pode me chamar.\n\nSucesso!\nAndrei | Conviso Application Security" },
+    { day:19, type:"follow",   subject:"[{empresa}] Última tentativa, integração gratuita por 30 dias", body:"Ola,\n\nÚltima mensagem sobre o tema, prometo.\n\nEm vez de mais uma conversa, proponho algo diferente: 30 dias gratuitos da Conviso Platform integrada ao pipeline de voces. Sem compromisso.\n\nVoces veem o resultado na pratica, vulnerabilidades identificadas, priorização por risco, o time funcionando. Se não fizer sentido, sem custo e sem pressao.\n\nVale arriscar 2 semanas de integração?" },
+    { day:25, type:"breakup",  subject:"Encerrando, {empresa}", body:"Ola,\n\nNão quero continuar incomodando. Encerro o contato por aqui.\n\nSe algum dia a conversa sobre AppSec no pipeline ganhar espaco, pode me chamar.\n\nSucesso!\nAndrei | Conviso Application Security" },
   ],
   cpo: [
     { day:1,  type:"linkedin", subject:"AppSec como diferencial de produto na {empresa}", body:"Ola, tudo bem?\n\nUma tendencia que estou vendo bastante em produtos de {setor}: clientes enterprise bloqueando renovações e novos contratos por falta de evidencia formal de seguranca, pentest, SAST, ISO 27001.\n\n{empresa} ja enfrentou esse tipo de exigencia de clientes?\n\nTenho cases de produtos similares que transformaram AppSec em diferencial competitivo real. Vale trocar uma ideia?" },
-    { day:3,  type:"email",    subject:"[{empresa}] AppSec que acelera vendas, nao trava o produto", body:"Ola,\n\nPara um Head de Produto, seguranca normalmente soa como atrito, mais processo, mais lentidao, mais custo.\n\nMas ha um angulo diferente que estou vendo em produtos de {setor}: empresas que formalizaram AppSec estao fechando deals enterprise que antes eram barrados por falta de evidencia de seguranca.\n\nIsso significa AppSec como acelerador de vendas, nao como overhead.\n\nConsigo te mostrar como funciona em 20 minutos. Disponivel essa semana?\n\nAbraço,\nAndrei Heimann | Conviso Application Security" },
+    { day:3,  type:"email",    subject:"[{empresa}] AppSec que acelera vendas, não trava o produto", body:"Ola,\n\nPara um Head de Produto, seguranca normalmente soa como atrito, mais processo, mais lentidao, mais custo.\n\nMas ha um angulo diferente que estou vendo em produtos de {setor}: empresas que formalizaram AppSec estao fechando deals enterprise que antes eram barrados por falta de evidencia de seguranca.\n\nIsso significa AppSec como acelerador de vendas, não como overhead.\n\nConsigo te mostrar como funciona em 20 minutos. Disponivel essa semana?\n\nAbraço,\nAndrei Heimann | Conviso Application Security" },
     { day:7,  type:"whatsapp", subject:"WhatsApp, CPO {empresa}", body:"Oi [Nome], Andrei da Conviso AppSec.\n\n{empresa} ja teve algum deal enterprise travado por exigencia de pentest, ISO 27001 ou evidencia de seguranca de aplicações?\n\nSe sim, tenho algo relevante para te mostrar. Vale 15 minutos?" },
-    { day:13, type:"email",    subject:"[{empresa}] Clientes exigindo seguranca, como responder", body:"Ola,\n\nCada vez mais, contratos enterprise incluem clausulas de seguranca: pentest anual, SAST no pipeline, ISO 27001, SOC 2.\n\nEmpresas de {setor} que trabalhamos estao usando a Conviso Platform para:\n\n- Gerar relatorios de seguranca para clientes enterprise\n- Acelerar certificações ISO 27001 e SOC 2\n- Transformar AppSec em argumento de venda, nao de bloqueio\n\nIsso muda a conversa de 'custo de seguranca' para 'investimento em crescimento'.\n\nFaz sentido conversar?\n\nAbraço,\nAndrei" },
-    { day:18, type:"follow",   subject:"[{empresa}] Uma última pergunta", body:"Ola,\n\nUma pergunta antes de encerrar o contato:\n\nNos próximos 6 meses, {empresa} tem algum deal enterprise onde o cliente pode exigir evidencia formal de seguranca?\n\nSe sim, vale muito uma conversa agora, antes da urgencia chegar. Se nao, sem problemas.\n\nAbraço,\nAndrei | Conviso Application Security" },
+    { day:13, type:"email",    subject:"[{empresa}] Clientes exigindo seguranca, como responder", body:"Ola,\n\nCada vez mais, contratos enterprise incluem clausulas de seguranca: pentest anual, SAST no pipeline, ISO 27001, SOC 2.\n\nEmpresas de {setor} que trabalhamos estao usando a Conviso Platform para:\n\n- Gerar relatorios de seguranca para clientes enterprise\n- Acelerar certificações ISO 27001 e SOC 2\n- Transformar AppSec em argumento de venda, não de bloqueio\n\nIsso muda a conversa de 'custo de seguranca' para 'investimento em crescimento'.\n\nFaz sentido conversar?\n\nAbraço,\nAndrei" },
+    { day:18, type:"follow",   subject:"[{empresa}] Uma última pergunta", body:"Ola,\n\nUma pergunta antes de encerrar o contato:\n\nNos próximos 6 meses, {empresa} tem algum deal enterprise onde o cliente pode exigir evidencia formal de seguranca?\n\nSe sim, vale muito uma conversa agora, antes da urgencia chegar. Se não, sem problemas.\n\nAbraço,\nAndrei | Conviso Application Security" },
     { day:24, type:"breakup",  subject:"Encerrando, {empresa}", body:"Ola,\n\nEncerro o contato por aqui. Se o tema de AppSec como diferencial de produto ganhar relevancia na {empresa}, pode me chamar.\n\nSucesso!\nAndrei Heimann | Conviso Application Security" },
   ],
   cfo: [
     { day:1,  type:"email",    subject:"[{empresa}] O custo real de uma vulnerabilidade em producao", body:"Ola,\n\nUma pergunta direta para um CFO: qual foi o custo do ultimo incidente de seguranca na {empresa}, ou qual seria o custo estimado de um vazamento de dados hoje?\n\nNa media do setor de {setor}: R$ 6,7 milhoes por incidente, sem contar multas LGPD, perda de clientes e custo reputacional.\n\nA Conviso Platform custa uma fracao disso e reduz vulnerabilidades críticas em 70%. O payback e no primeiro incidente evitado.\n\nConsigo te mostrar o business case em 20 minutos. Disponivel?\n\nAbraço,\nAndrei Heimann | Conviso Application Security" },
-    { day:5,  type:"linkedin", subject:"ROI de AppSec, {empresa}", body:"Ola,\n\nTrabalho com CFOs de empresas de {setor} em uma conta que normalmente nao esta no orcamento de tecnologia: seguranca de aplicações.\n\nO argumento que tem funcionado: o custo de remediar uma vulnerabilidade em producao e 6x maior do que preveni-la no desenvolvimento. Com a Conviso Platform, o payback aparece no primeiro incidente evitado.\n\nVale 20 minutos para te mostrar o business case?\n\nAbraço,\nAndrei" },
+    { day:5,  type:"linkedin", subject:"ROI de AppSec, {empresa}", body:"Ola,\n\nTrabalho com CFOs de empresas de {setor} em uma conta que normalmente não esta no orcamento de tecnologia: seguranca de aplicações.\n\nO argumento que tem funcionado: o custo de remediar uma vulnerabilidade em producao e 6x maior do que preveni-la no desenvolvimento. Com a Conviso Platform, o payback aparece no primeiro incidente evitado.\n\nVale 20 minutos para te mostrar o business case?\n\nAbraço,\nAndrei" },
     { day:10, type:"email",    subject:"[{empresa}] Business case: prevencao vs remediação", body:"Ola,\n\nUm numero que costuma mudar a perspectiva de CFOs:\n\nCusto de remediar vulnerabilidade em DESENVOLVIMENTO: 1x\nCusto de remediar vulnerabilidade em PRODUCAO: 6x\nCusto de um incidente de seguranca no setor de {setor}: R$ 6,7 milhoes em media\n\nIsso significa que investir em AppSec preventiva não é custo, e redução de risco financeiro mensuravel.\n\nPosso montar um business case específico para {empresa} em 20 minutos de conversa. Vale?\n\nAbraço,\nAndrei Heimann | Conviso Application Security" },
     { day:16, type:"call",    subject:"Cold call, CFO {empresa}", body:"Bom dia [Nome], Andrei da Conviso Application Security. Tenho 30 segundos?\n\nLigo porque tenho um business case específico para CFOs de empresas de {setor}, sobre custo de vulnerabilidades em producao vs investimento em prevencao.\n\nO numero que costuma surpreender: remediar uma vulnerabilidade em producao custa 6x mais do que preveni-la no desenvolvimento. Faz sentido eu te mostrar o calculo aplicado a {empresa}?" },
-    { day:22, type:"breakup",  subject:"Encerrando, {empresa}", body:"Ola,\n\nÚltima mensagem. Entendo que o timing pode nao ser o ideal.\n\nSe o tema de risco financeiro de seguranca de aplicações ganhar relevancia na agenda da {empresa}, pode me chamar.\n\nAbraço,\nAndrei | Conviso Application Security" },
+    { day:22, type:"breakup",  subject:"Encerrando, {empresa}", body:"Ola,\n\nÚltima mensagem. Entendo que o timing pode não ser o ideal.\n\nSe o tema de risco financeiro de seguranca de aplicações ganhar relevancia na agenda da {empresa}, pode me chamar.\n\nAbraço,\nAndrei | Conviso Application Security" },
   ],
   legal: [
     { day:1,  type:"email",    subject:"[{empresa}] ISO 27001 e AppSec, como acelerar", body:"Ola,\n\nEmpresas de {setor} estao enfrentando uma pressao crescente: clientes enterprise, reguladores e auditorias exigindo evidencia formal de seguranca de aplicações, ISO 27001, SOC 2, PCI-DSS.\n\nO processo manual e demorado e caro. A Conviso Platform automatiza os controles de AppSec necessarios e reduziu em 60% o tempo para certificação de empresas similares.\n\nFaz sentido conversar sobre como isso se aplicaria a {empresa}?\n\nAbraço,\nAndrei Heimann | Conviso Application Security" },
@@ -575,7 +574,7 @@ function AccountModal(props) {
     try { var parts=path.split("."); var cur=d; for(var i=0;i<parts.length;i++){cur=cur[parts[i]];if(cur==null)return null;} return cur; } catch(e){return null;}
   }
 
-  var tabs=[{id:"overview",label:"Visao Geral"},{id:"stakeholders",label:"Stakeholders"},{id:"messages",label:"Mensagens"},{id:"spin",label:"SPIN & Objecoes"},{id:"plan",label:"Plano de Acao"}];
+  var tabs=[{id:"overview",label:"Visão Geral"},{id:"stakeholders",label:"Stakeholders"},{id:"messages",label:"Mensagens"},{id:"spin",label:"SPIN & Objeções"},{id:"plan",label:"Plano de Acao"}];
   var empresa=sd("empresa")||{};
   var stakeholders=safeArr(sd("stakeholders"));
   var dores=safeArr(sd("dores.principais"));
@@ -584,12 +583,12 @@ function AccountModal(props) {
   var triggers=safeArr(sd("triggers"));
   var noticias=safeArr(sd("noticias"));
   var spin=safeArr(sd("estrategia.perguntas_spin"));
-  var objecoes=safeArr(sd("estrategia.objecoes"));
-  var ae=safeArr(sd("proximos_passos.ae"));
-  var bdr=safeArr(sd("proximos_passos.bdr"));
-  var prazo=sd("proximos_passos.prazo")||"";
+  var objecoes=safeArr(sd("estrategia.objeções"));
+  var ae=safeArr(sd("próximos_passos.ae"));
+  var bdr=safeArr(sd("próximos_passos.bdr"));
+  var prazo=sd("próximos_passos.prazo")||"";
   var useCases=safeArr(sd("fit.use_cases"));
-  var solucoes=safeArr(sd("fit.solucoes_conviso"));
+  var solucoes=safeArr(sd("fit.soluções_conviso"));
   var fitJust=sd("fit.justificativa")||"";
   var concorrentes=safeArr(sd("mercado.competidores_provedor"));
   var CHANNELS=[{key:"emails",label:"E-mail",color:"#0ea5e9",bg:"rgba(14,165,233,.08)",isObj:true},{key:"inmails",label:"InMail",color:"#0a66c2",bg:"rgba(10,102,194,.08)",isObj:true},{key:"whatsapps",label:"WhatsApp",color:"#16a34a",bg:"rgba(22,163,74,.08)",isObj:false},{key:"cold_calls",label:"Cold Call",color:"#92400e",bg:"#fef3c7",isObj:false}];
@@ -628,14 +627,14 @@ function AccountModal(props) {
 
           {activeTab==="overview"&&(
             <div>
-              {empresa.resumo&&<Sec title="Resumo da Empresa"><p style={{fontSize:13,lineHeight:1.8,color:"#334155",margin:"0 0 14px"}}>{empresa.resumo}</p><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:8}}>{[["Setor",empresa.setor],["Porte",empresa.tamanho],["Faturamento",empresa.faturamento],["Clientes",empresa.clientes],["Estagio",empresa.estagio],["Bolsa",empresa.bolsa]].filter(function(x){return x[1];}).map(function(item){return <div key={item[0]} style={{background:"#dcfce7",border:"1px solid #bbf7d0",borderRadius:10,padding:"10px 12px"}}><div style={{fontSize:8,color:"#065f46",textTransform:"uppercase",letterSpacing:1,fontWeight:700,marginBottom:3}}>{item[0]}</div><div style={{fontSize:12,color:"#0f172a",fontWeight:600}}>{item[1]}</div></div>;})}</div></Sec>}
+              {empresa.resumo&&<Sec title="Resumo da Empresa"><p style={{fontSize:13,lineHeight:1.8,color:"#334155",margin:"0 0 14px"}}>{empresa.resumo}</p><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:8}}>{[["Setor",empresa.setor],["Porte",empresa.tamanho],["Faturamento",empresa.faturamento],["Clientes",empresa.clientes],["Estágio",empresa.estagio],["Bolsa",empresa.bolsa]].filter(function(x){return x[1];}).map(function(item){return <div key={item[0]} style={{background:"#dcfce7",border:"1px solid #bbf7d0",borderRadius:10,padding:"10px 12px"}}><div style={{fontSize:8,color:"#065f46",textTransform:"uppercase",letterSpacing:1,fontWeight:700,marginBottom:3}}>{item[0]}</div><div style={{fontSize:12,color:"#0f172a",fontWeight:600}}>{item[1]}</div></div>;})}</div></Sec>}
               {fitJust&&<Sec title="Fit Conviso"><p style={{fontSize:13,lineHeight:1.7,color:"#334155",marginBottom:10}}>{fitJust}</p>{solucoes.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:6}}>{solucoes.map(function(s,i){return <span key={i} style={{background:"rgba(16,185,129,.08)",border:"1px solid rgba(16,185,129,.25)",color:"#059669",borderRadius:8,padding:"3px 10px",fontSize:10,fontWeight:600}}>{s}</span>;})}</div>}</Sec>}
-              {useCases.length>0&&<Sec title="Use Cases">{useCases.map(function(u,i){return <R key={i} icon=">" color="#10b981">{u}</R>;})}</Sec>}
+              {useCases.length>0&&<Sec title="Use Cases Prioritários">{useCases.map(function(u,i){return <R key={i} icon=">" color="#10b981">{u}</R>;})}</Sec>}
               {dores.length>0&&<Sec title="Dores Mapeadas">{dores.map(function(d2,i){return <R key={i} icon="!" color="#ef4444">{d2}</R>;})} {exposicao.length>0&&<div style={{marginTop:10,display:"flex",flexWrap:"wrap",gap:6}}>{exposicao.map(function(r,i){return <span key={i} style={{background:"#fef3c7",border:"1px solid #f59e0b",color:"#92400e",borderRadius:8,padding:"3px 10px",fontSize:10,fontWeight:600}}>{r}</span>;})}</div>}</Sec>}
               {triggers.length>0&&<Sec title="Gatilhos Comerciais">{triggers.map(function(t,i){return <R key={i} icon="T" color="#7c3aed">{t}</R>;})}</Sec>}
-              {sinais.length>0&&<Sec title="Sinais de Intencao"><div style={{background:"#0c2340",borderRadius:12,padding:"12px 16px"}}>{sinais.map(function(s,i){return <div key={i} style={{fontSize:11.5,color:"#7dd3fc",lineHeight:1.6,display:"flex",gap:8,marginBottom:5}}><span style={{color:"#38bdf8",flexShrink:0}}>o</span>{s}</div>;})}</div></Sec>}
-              {concorrentes.length>0&&<Sec title="Concorrentes Provaveis"><div style={{display:"flex",flexWrap:"wrap",gap:6}}>{concorrentes.map(function(cc,i){return <span key={i} style={{background:"#fef3c7",border:"1px solid #f59e0b",color:"#92400e",borderRadius:8,padding:"3px 10px",fontSize:10,fontWeight:600}}>{cc}</span>;})}</div></Sec>}
-              {noticias.length>0&&<Sec title="Noticias e Contexto">{noticias.map(function(n,i){return <div key={i} style={{background:"#f8fafc",border:"1px solid #e8edf4",borderRadius:12,padding:"12px 14px",marginBottom:8}}>{n.url?<a href={n.url} target="_blank" rel="noopener noreferrer" style={{fontSize:12.5,fontWeight:700,color:"#0ea5e9",textDecoration:"none",display:"block",marginBottom:3}}>{n.titulo}</a>:<div style={{fontSize:12.5,fontWeight:700,color:"#0f172a",marginBottom:3}}>{n.titulo}</div>}<div style={{fontSize:11.5,color:"#64748b",lineHeight:1.6,marginBottom:3}}>{n.resumo}</div><div style={{fontSize:10,color:"#059669",fontWeight:600}}>{"> "+n.relevancia}</div></div>;})}</Sec>}
+              {sinais.length>0&&<Sec title="Sinais de Intenção"><div style={{background:"#0c2340",borderRadius:12,padding:"12px 16px"}}>{sinais.map(function(s,i){return <div key={i} style={{fontSize:11.5,color:"#7dd3fc",lineHeight:1.6,display:"flex",gap:8,marginBottom:5}}><span style={{color:"#38bdf8",flexShrink:0}}>o</span>{s}</div>;})}</div></Sec>}
+              {concorrentes.length>0&&<Sec title="Concorrentes Prováveis"><div style={{display:"flex",flexWrap:"wrap",gap:6}}>{concorrentes.map(function(cc,i){return <span key={i} style={{background:"#fef3c7",border:"1px solid #f59e0b",color:"#92400e",borderRadius:8,padding:"3px 10px",fontSize:10,fontWeight:600}}>{cc}</span>;})}</div></Sec>}
+              {noticias.length>0&&<Sec title="Notícias e Contexto">{noticias.map(function(n,i){return <div key={i} style={{background:"#f8fafc",border:"1px solid #e8edf4",borderRadius:12,padding:"12px 14px",marginBottom:8}}>{n.url?<a href={n.url} target="_blank" rel="noopener noreferrer" style={{fontSize:12.5,fontWeight:700,color:"#0ea5e9",textDecoration:"none",display:"block",marginBottom:3}}>{n.titulo}</a>:<div style={{fontSize:12.5,fontWeight:700,color:"#0f172a",marginBottom:3}}>{n.titulo}</div>}<div style={{fontSize:11.5,color:"#64748b",lineHeight:1.6,marginBottom:3}}>{n.resumo}</div><div style={{fontSize:10,color:"#059669",fontWeight:600}}>{"→ "+n.relevancia}</div></div>;})}</Sec>}
             </div>
           )}
 
@@ -653,7 +652,7 @@ function AccountModal(props) {
                         <div style={{fontSize:13,fontWeight:700,color:"#0f172a",lineHeight:1.3,flex:1}}>{s.cargo}</div>
                         <div style={{display:"flex",flexDirection:"column",gap:3,alignItems:"flex-end",marginLeft:8,flexShrink:0}}>
                           <span style={{background:pc+"20",border:"1px solid "+pc,color:pc,borderRadius:6,padding:"2px 8px",fontSize:8,fontWeight:700,whiteSpace:"nowrap"}}>{s.prioridade}</span>
-                          <span style={{fontSize:8,color:uc,fontWeight:600}}>{"Urgencia: "+s.urgencia}</span>
+                          <span style={{fontSize:8,color:uc,fontWeight:600}}>{"Urgência: "+s.urgencia}</span>
                         </div>
                       </div>
                       <div style={{fontSize:11.5,color:"#64748b",lineHeight:1.65,marginBottom:s.linkedin||s.email?10:0}}>{s.angulo}</div>
@@ -715,15 +714,15 @@ function AccountModal(props) {
                 })}
               </Sec>
               {objecoes.length>0&&(
-                <Sec title="Objecoes e Respostas">
+                <Sec title="Objeções e Respostas">
                   {objecoes.map(function(o,i){
                     return (
                       <div key={i} style={{background:"#f8fafc",border:"1.5px solid #e8edf4",borderRadius:14,padding:"14px 16px",marginBottom:10}}>
                         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8,gap:8}}>
-                          <div style={{fontSize:12,fontWeight:700,color:"#92400e",lineHeight:1.4,flex:1}}>{'"'+o.objecao+'"'}</div>
-                          <CopyBtn text={'"'+o.objecao+'"\n-> '+o.resposta}/>
+                          <div style={{fontSize:12,fontWeight:700,color:"#92400e",lineHeight:1.4,flex:1}}>{'"'+o.objeção+'"'}</div>
+                          <CopyBtn text={'"'+o.objeção+'"\n-> '+o.resposta}/>
                         </div>
-                        <div style={{fontSize:12,color:"#334155",lineHeight:1.65}}>{"-> "+o.resposta}</div>
+                        <div style={{fontSize:12,color:"#334155",lineHeight:1.65}}>{"→ "+o.resposta}</div>
                       </div>
                     );
                   })}
@@ -735,10 +734,10 @@ function AccountModal(props) {
           {activeTab==="plan"&&(
             <div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:18}}>
-                <Sec title="AE , Acoes Imediatas">
+                <Sec title="AE , Ações Imediatas">
                   {ae.map(function(a,i){return <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"8px 0",borderBottom:"1px solid #f1f5f9",gap:8}}><div style={{display:"flex",gap:8,flex:1}}><span style={{color:"#10b981",flexShrink:0,fontWeight:700}}>{">"}</span><span style={{fontSize:12,color:"#334155",lineHeight:1.5}}>{a}</span></div><CopyBtn text={a}/></div>;})}
                 </Sec>
-                <Sec title="BDR , Acoes de Suporte">
+                <Sec title="BDR , Ações de Suporte">
                   {bdr.map(function(a,i){return <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"8px 0",borderBottom:"1px solid #f1f5f9",gap:8}}><div style={{display:"flex",gap:8,flex:1}}><span style={{color:"#f59e0b",flexShrink:0,fontWeight:700}}>{">"}</span><span style={{fontSize:12,color:"#334155",lineHeight:1.5}}>{a}</span></div><CopyBtn text={a}/></div>;})}
                 </Sec>
               </div>
@@ -752,6 +751,134 @@ function AccountModal(props) {
   );
 }
 
+
+
+function CollapsibleChannels(props) {
+  var sd = props.sd; var CHANNELS = props.CHANNELS;
+  var [open, setOpen] = useState({"emails":true,"inmails":false,"whatsapps":false,"cold_calls":false});
+  function toggle(key) { setOpen(function(prev){var n=Object.assign({},prev);n[key]=!n[key];return n;}); }
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:10}}>
+      {CHANNELS.map(function(cfg){
+        var items=safeArr(sd("estrategia."+cfg.key));
+        if(!items.length)return null;
+        var isOpen=open[cfg.key];
+        return (
+          <div key={cfg.key} style={{border:"1.5px solid #e8edf4",borderRadius:16,overflow:"hidden",transition:"all .25s"}}>
+            <div onClick={function(){toggle(cfg.key);}} style={{display:"flex",alignItems:"center",gap:12,padding:"13px 18px",background:isOpen?cfg.bg:"#fafafa",cursor:"pointer",userSelect:"none",transition:"background .2s"}}>
+              <div style={{width:32,height:32,borderRadius:9,background:cfg.bg,border:"1.5px solid "+cfg.color+"40",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                <span style={{fontSize:11,fontWeight:800,color:cfg.color}}>{cfg.label.slice(0,2)}</span>
+              </div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:13,fontWeight:700,color:"#0f172a"}}>{cfg.label}</div>
+                <div style={{fontSize:10,color:"#94a3b8"}}>{items.length+" template"+(items.length>1?"s":"")}</div>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                style={{transition:"transform .25s cubic-bezier(.22,1,.36,1)",transform:isOpen?"rotate(180deg)":"rotate(0deg)"}}>
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+            {isOpen&&(
+              <div style={{padding:"14px 16px",display:"flex",flexDirection:"column",gap:12,borderTop:"1px solid #f1f5f9"}}>
+                {items.map(function(item,i){
+                  var text=cfg.isObj?item.corpo:item;
+                  var ck=cfg.key+"-"+i;
+                  return (
+                    <div key={i} style={{border:"1px solid #e8edf4",borderRadius:12,overflow:"hidden"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:8,padding:"9px 14px",background:cfg.bg}}>
+                        <span style={{fontSize:10,fontWeight:700,color:cfg.color}}>{"Template "+(i+1)}</span>
+                        {cfg.isObj&&item.assunto&&<span style={{fontSize:11,color:"#64748b",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{", "+item.assunto}</span>}
+                        <CopyBtn text={(cfg.isObj&&item.assunto?"Assunto: "+item.assunto+"\n\n":"")+text}/>
+                      </div>
+                      <div style={{padding:"14px 16px",fontSize:12.5,color:"#1e293b",whiteSpace:"pre-wrap",lineHeight:1.85,borderLeft:"3px solid "+cfg.color}}>{text}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+
+function BibliotecaView(props) {
+  var [seqs, setSeqs] = useState([]);
+  var [loading, setLoading] = useState(true);
+  var [openSeq, setOpenSeq] = useState(null);
+
+  useEffect(function() {
+    storageList("seq:").then(function(keys) {
+      if (!keys.length) { setLoading(false); props.onCountChange(0); return; }
+      Promise.all(keys.map(storageGet)).then(function(items) {
+        var valid = items.filter(Boolean).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+        setSeqs(valid); setLoading(false); props.onCountChange(valid.length);
+      });
+    }).catch(function(){setLoading(false);});
+  }, []);
+
+  function deleteSeq(id) {
+    if (!window.confirm("Remover esta sequência?")) return;
+    storageDel(id).then(function() {
+      setSeqs(function(prev){var n=prev.filter(function(s){return s.id!==id;});props.onCountChange(n.length);return n;});
+      props.showToast("Sequência removida.","#ef4444");
+    });
+  }
+
+  if (loading) return <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"64px 0",gap:10}}><div style={{width:8,height:8,borderRadius:"50%",background:"#10b981"}}/><span style={{color:"#94a3b8",fontSize:13}}>Carregando...</span></div>;
+
+  return (
+    <div>
+      <div style={{marginBottom:28}}>
+        <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>Biblioteca</div>
+        <div style={{fontSize:13,color:"#64748b"}}>{seqs.length+" sequência"+(seqs.length!==1?"s":"")+" salva"+(seqs.length!==1?"s":"")+" , todas as cadências geradas ficam aqui."}</div>
+      </div>
+
+      {seqs.length===0 ? (
+        <div style={{textAlign:"center",padding:"64px 0",background:"#f8fafc",borderRadius:20,border:"1.5px dashed #e2e8f0"}}>
+          <div style={{fontSize:36,marginBottom:12}}>📚</div>
+          <div style={{fontSize:15,fontWeight:700,color:"#334155",marginBottom:6}}>Nenhuma sequência salva ainda</div>
+          <div style={{fontSize:12,color:"#94a3b8",lineHeight:1.6}}>Vá para Sequências, gere uma cadência e clique em Salvar na Biblioteca.</div>
+        </div>
+      ) : (
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:16}}>
+          {seqs.map(function(seq){
+            var fc = FIT_CONFIG[(seq.account&&seq.account.fit)||"ALTO"]||FIT_CONFIG.ALTO;
+            var TOUCH_TYPES_LOCAL = {email:{label:"E-mail",color:"#0ea5e9",bg:"rgba(14,165,233,.08)"},linkedin:{label:"InMail",color:"#0a66c2",bg:"rgba(10,102,194,.08)"},whatsapp:{label:"WhatsApp",color:"#16a34a",bg:"rgba(22,163,74,.08)"},call:{label:"Cold Call",color:"#92400e",bg:"#fef3c7"},follow:{label:"Follow-up",color:"#7c3aed",bg:"#f5f3ff"},breakup:{label:"Breakup",color:"#64748b",bg:"#f8fafc"}};
+            return (
+              <div key={seq.id} style={{background:"#fff",border:"1.5px solid #e8edf4",borderRadius:20,padding:"20px 22px",boxShadow:"0 2px 12px rgba(15,23,42,.06)",transition:"all .25s"}}
+                onMouseEnter={function(e){e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow="0 12px 40px rgba(15,23,42,.12)";e.currentTarget.style.borderColor="#d1dae8";}}
+                onMouseLeave={function(e){e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 2px 12px rgba(15,23,42,.06)";e.currentTarget.style.borderColor="#e8edf4";}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:15,fontWeight:700,color:"#0f172a",marginBottom:3,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{seq.account&&seq.account.nome}</div>
+                    <div style={{fontSize:11,color:"#94a3b8",marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{seq.profile&&seq.profile.label}</div>
+                    <div style={{fontSize:10,color:"#cbd5e1"}}>{fmtDate(seq.createdAt)}</div>
+                  </div>
+                  <span style={{background:fc.bg,border:"1px solid "+fc.border,color:fc.text,borderRadius:8,padding:"3px 10px",fontSize:9,fontWeight:700,flexShrink:0,marginLeft:8}}>{"FIT "+(seq.account&&seq.account.fit)}</span>
+                </div>
+                <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:16}}>
+                  {safeArr(seq.touches).map(function(t,i){
+                    var tc=TOUCH_TYPES_LOCAL[t.type]||TOUCH_TYPES_LOCAL.email;
+                    return <span key={i} style={{background:tc.bg,color:tc.color,borderRadius:6,padding:"2px 8px",fontSize:9,fontWeight:700}}>{"D"+t.day+" "+tc.label}</span>;
+                  })}
+                </div>
+                <div style={{display:"flex",gap:8}}>
+                  <button onClick={function(){setOpenSeq(seq);}} style={{flex:1,background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",border:"none",borderRadius:10,padding:"9px 0",fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 3px 10px rgba(16,185,129,.3)"}}>Abrir Sequência</button>
+                  <button onClick={function(){deleteSeq(seq.id);}} style={{background:"none",border:"1px solid #fee2e2",color:"#ef4444",borderRadius:10,padding:"9px 12px",fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>Remover</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {openSeq&&<SequenceModal seq={openSeq} onClose={function(){setOpenSeq(null);}}/>}
+    </div>
+  );
+}
 
 function Sec(props) {
   return (
@@ -802,7 +929,7 @@ function SearchView(props) {
     var isHealth = /hapvida|amil|unimed|dasa|fleury|einstein|afya|saude|health/.test(lower);
     var isEcomm  = /magalu|americanas|shopee|mercado livre|olist/.test(lower);
     var isTelecom= /\bvivo\b|claro|\btim\b|algar|embratel/.test(lower);
-    var setor = isFintech?"Fintech / Banco Digital":isSaaS?"Software / SaaS B2B":isHealth?"Healthtech / Saude Digital":isEcomm?"E-commerce / Varejo Digital":isTelecom?"Telecomunicacoes":"Empresa com Produto Digital";
+    var setor = isFintech?"Fintech / Banco Digital":isSaaS?"Software / SaaS B2B":isHealth?"Healthtech / Saude Digital":isEcomm?"E-commerce / Varejo Digital":isTelecom?"Telecomunicações":"Empresa com Produto Digital";
     var tier  = (isFintech||isSaaS||isEcomm||isTelecom) ? "Tier 1" : "Tier 2";
     var resumo = tavilyAnswers.length > 0
       ? (tavilyAnswers[0]+(tavilyAnswers[1]?" "+tavilyAnswers[1]:"")).slice(0,500)
@@ -813,72 +940,72 @@ function SearchView(props) {
     if (!noticias.length) noticias = [{titulo:"Buscar noticias recentes de "+company,resumo:"Pesquise '"+company+" seguranca ISO vulnerabilidade' no Google News.",relevancia:"Trigger identification",url:""}];
     return {
       empresa:{nome:company,setor:setor,resumo:resumo,tamanho:funcionarios||(tier==="Tier 1"?"Grande porte":"Medio porte"),faturamento:faturamento||null,clientes:clientes||null,estagio:"Consolidada / Scale-up",bolsa:bolsa||(isFintech||isSaaS?"Verificar B3/Nasdaq":"Capital fechado")},
-      fit:{score:"ALTO",justificativa:company+" atua em "+setor+", vertical de alta aderencia ao ICP da Conviso Application Security. Empresas nesse perfil tem times de desenvolvimento ativos e pressao crescente por AppSec formal de clientes e reguladores.",solucoes_conviso:["Conviso Platform","SAST , Analise Estatica","DAST , Teste Dinamico","SCA , Open Source Security","Gestao de Vulnerabilidades","Pentest Continuo","Security Champions Program"],use_cases:["SAST e DAST integrados ao pipeline CI/CD","Gestao centralizada de vulnerabilidades com SLA","Pentest continuo em APIs e aplicacoes web","Security Champions , devs como multiplicadores","Compliance ISO 27001 e PCI-DSS acelerado"]},
+      fit:{score:"ALTO",justificativa:company+" atua em "+setor+", vertical de alta aderencia ao ICP da Conviso Application Security. Empresas nesse perfil tem times de desenvolvimento ativos e pressao crescente por AppSec formal de clientes e reguladores.",solucoes_conviso:["Conviso Platform","SAST , Analise Estatica","DAST , Teste Dinamico","SCA , Open Source Security","Gestão de Vulnerabilidades","Pentest Continuo","Security Champions Program"],use_cases:["SAST e DAST integrados ao pipeline CI/CD","Gestão centralizada de vulnerabilidades com SLA","Pentest continuo em APIs e aplicações web","Security Champions , devs como multiplicadores","Compliance ISO 27001 e PCI-DSS acelerado"]},
       mercado:{competidores_provedor:["Veracode","Checkmarx","Snyk","SonarQube","Fluid Attacks","GitHub Advanced Security"]},
-      dores:{principais:["Vulnerabilidades criticas descobertas apenas em producao , custo 6x maior de remediacao","Time de seguranca sobrecarregado, sem escala para acompanhar deploys","Clientes enterprise exigindo ISO 27001 ou SOC 2 para fechar contratos","PCI-DSS v4.0 exige SAST e DAST formais em aplicacoes de pagamento","Open source sem controle , dependencias com CVEs criticos em producao"],exposicao_regulatoria:["PCI-DSS v4.0","BACEN Res. 4.658","ISO 27001","LGPD","OWASP Top 10"],sinais_ativos:["Verificar vagas de AppSec Engineer e DevSecOps no LinkedIn","Checar certificacao ISO 27001 publica , ausencia e oportunidade","Buscar CVEs publicos associados a produtos da empresa no NVD","Monitorar bug bounty programs ativos"]},
-      triggers:["Processo de certificacao ISO 27001 ou SOC 2 em andamento","Crescimento acelerado do time de engenharia","Incidente de seguranca recente ou vazamento de dados","Cliente enterprise bloqueando contrato por falta de AppSec","Lancamento de novo produto digital ou API publica"],
+      dores:{principais:["Vulnerabilidades críticas descobertas apenas em producao , custo 6x maior de remediação","Time de seguranca sobrecarregado, sem escala para acompanhar deploys","Clientes enterprise exigindo ISO 27001 ou SOC 2 para fechar contratos","PCI-DSS v4.0 exige SAST e DAST formais em aplicações de pagamento","Open source sem controle , dependencias com CVEs críticos em producao"],exposicao_regulatoria:["PCI-DSS v4.0","BACEN Res. 4.658","ISO 27001","LGPD","OWASP Top 10"],sinais_ativos:["Verificar vagas de AppSec Engineer e DevSecOps no LinkedIn","Checar certificação ISO 27001 publica , ausencia e oportunidade","Buscar CVEs públicos associados a produtos da empresa no NVD","Monitorar bug bounty programs ativos"]},
+      triggers:["Processo de certificação ISO 27001 ou SOC 2 em andamento","Crescimento acelerado do time de engenharia","Incidente de seguranca recente ou vazamento de dados","Cliente enterprise bloqueando contrato por falta de AppSec","Lancamento de novo produto digital ou API publica"],
       stakeholders:[
         {cargo:"CISO / Head de Seguranca da Informacao",angulo:"Decisor estrategico. Define budget e estrategia de AppSec. Sente pressao de clientes, reguladores e board. Quer reduzir risco sem frear o produto.",prioridade:"PRIMARIO",urgencia:"Alta"},
         {cargo:"CTO / VP de Engenharia",angulo:"Co-decisor tecnico e economico. Controla o roadmap e quer seguranca integrada ao pipeline sem travar entregas.",prioridade:"PRIMARIO",urgencia:"Alta"},
-        {cargo:"Engineering Manager / Head de Engenharia",angulo:"Usuario direto e influenciador forte. Avalia friccao da integracao e qualidade dos resultados no pipeline.",prioridade:"SECUNDARIO",urgencia:"Media"},
+        {cargo:"Engineering Manager / Head de Engenharia",angulo:"Usuario direto e influenciador forte. Avalia friccao da integração e qualidade dos resultados no pipeline.",prioridade:"SECUNDARIO",urgencia:"Media"},
         {cargo:"CPO / Head de Produto",angulo:"Aliado estrategico. Quer AppSec como diferencial para fechar deals enterprise.",prioridade:"SECUNDARIO",urgencia:"Media"},
-        {cargo:"Head de Compliance / Juridico",angulo:"Entra em deals com exigencia regulatoria. Valida aderencia da solucao ao framework regulatorio.",prioridade:"TERCIARIO",urgencia:"Baixa"},
+        {cargo:"Head de Compliance / Juridico",angulo:"Entra em deals com exigencia regulatoria. Valida aderencia da solução ao framework regulatorio.",prioridade:"TERCIARIO",urgencia:"Baixa"},
         {cargo:"CFO / Diretor Financeiro",angulo:"Aprovacao de budget. Quer ROI claro , custo de vuln em producao 6x maior vs investimento na Conviso.",prioridade:"TERCIARIO",urgencia:"Baixa"},
       ],
       noticias: noticias,
       estrategia:{
         tier:tier,
         emails:[
-          {assunto:company+" + Conviso , seguranca de aplicacoes",corpo:"Ola,\n\nChego ate voce porque "+company+" tem o perfil exato de empresa onde a Conviso Application Security gera mais impacto , time de engenharia ativo em "+setor+", com pressao crescente por AppSec formal.\n\nUma realidade comum em empresas similares:\n, Vulnerabilidades criticas descobertas apenas em producao , custo 6x maior\n, Time de seguranca sem escala para acompanhar o ritmo de deploys\n, Clientes enterprise bloqueando contratos por falta de AppSec formal\n\nA Conviso Platform integra SAST, DAST, SCA e gestao de vulnerabilidades no pipeline , com integracao nativa ao GitHub, GitLab e Azure DevOps.\n\nConsigo te mostrar em 20 minutos como funciona.\n\nTem disponibilidade essa semana?\n\nAbraço,\nAndrei Heimann\nAccount Executive | Conviso Application Security\n(51) 99436-7667"},
-          {assunto:company+": quanto custa uma vulnerabilidade em producao?",corpo:"Ola,\n\nDireto ao ponto: o custo medio de remediacao de uma vulnerabilidade descoberta em producao e 6x maior do que se detectada durante o desenvolvimento.\n\nEmpresas de "+setor+" reduziram esse custo em mais de 70% ao integrar SAST e DAST no pipeline , sem frear a velocidade de entrega.\n\nA "+company+" tem o perfil certo para esse resultado. Valeria 20 minutos?\n\nAbraço,\nAndrei Heimann | Conviso Application Security"},
-          {assunto:"Case: ISO 27001 em 60% menos tempo , empresa similar a "+company,corpo:"Ola,\n\nRecentemente ajudamos uma empresa de "+setor+" a:\n\n, Integrar SAST no pipeline CI/CD em menos de 2 semanas\n, Zerar vulnerabilidades criticas em producao nos primeiros 90 dias\n, Reduzir em 60% o tempo para certificacao ISO 27001\n, Criar um programa Security Champions escalavel\n\nO time de engenharia nao precisou parar o roadmap , o nosso CS conduziu tudo.\n\nFaz sentido eu te contar como funcionou? 20 minutos essa semana.\n\nAbraço,\nAndrei Heimann\nAccount Executive | Conviso Application Security\n(51) 99436-7667"},
+          {assunto:company+" + Conviso , seguranca de aplicações",corpo:"Ola,\n\nChego ate voce porque "+company+" tem o perfil exato de empresa onde a Conviso Application Security gera mais impacto , time de engenharia ativo em "+setor+", com pressao crescente por AppSec formal.\n\nUma realidade comum em empresas similares:\n, Vulnerabilidades críticas descobertas apenas em producao , custo 6x maior\n, Time de seguranca sem escala para acompanhar o ritmo de deploys\n, Clientes enterprise bloqueando contratos por falta de AppSec formal\n\nA Conviso Platform integra SAST, DAST, SCA e gestão de vulnerabilidades no pipeline , com integração nativa ao GitHub, GitLab e Azure DevOps.\n\nConsigo te mostrar em 20 minutos como funciona.\n\nTem disponibilidade essa semana?\n\nAbraço,\nAndrei Heimann\nAccount Executive | Conviso Application Security\n(51) 99436-7667"},
+          {assunto:company+": quanto custa uma vulnerabilidade em producao?",corpo:"Ola,\n\nDireto ao ponto: o custo medio de remediação de uma vulnerabilidade descoberta em producao e 6x maior do que se detectada durante o desenvolvimento.\n\nEmpresas de "+setor+" reduziram esse custo em mais de 70% ao integrar SAST e DAST no pipeline , sem frear a velocidade de entrega.\n\nA "+company+" tem o perfil certo para esse resultado. Valeria 20 minutos?\n\nAbraço,\nAndrei Heimann | Conviso Application Security"},
+          {assunto:"Case: ISO 27001 em 60% menos tempo , empresa similar a "+company,corpo:"Ola,\n\nRecentemente ajudamos uma empresa de "+setor+" a:\n\n, Integrar SAST no pipeline CI/CD em menos de 2 semanas\n, Zerar vulnerabilidades críticas em producao nos primeiros 90 dias\n, Reduzir em 60% o tempo para certificação ISO 27001\n, Criar um programa Security Champions escalavel\n\nO time de engenharia não precisou parar o roadmap , o nosso CS conduziu tudo.\n\nFaz sentido eu te contar como funcionou? 20 minutos essa semana.\n\nAbraço,\nAndrei Heimann\nAccount Executive | Conviso Application Security\n(51) 99436-7667"},
         ],
         inmails:[
-          {assunto:company+" + Conviso , vale 20 minutos?",corpo:"Ola, tudo bem?\n\nVi que "+company+" tem um time de engenharia ativo em "+setor+", exatamente o perfil onde a Conviso entrega mais resultado.\n\nEmpresa similar reduziu vulnerabilidades criticas em 70% e acelerou ISO 27001 em 60% apos integrar a Conviso Platform no pipeline.\n\nFaz sentido um papo de 20 minutos para eu entender como esta o processo de AppSec de voces hoje?\n\nAbraço,\nAndrei Heimann | AE Enterprise , Conviso Application Security"},
-          {assunto:"Uma pergunta sobre seguranca no ciclo de desenvolvimento",corpo:"Ola!\n\nPergunta direta: como voces identificam vulnerabilidades no codigo hoje , e automatizado no pipeline, manual, ou atraves de pentests pontuais?\n\nDependendo da resposta, posso te mostrar como empresas similares resolveram isso de forma estruturada com a Conviso Platform.\n\nVale um papo rapido?"},
-          {assunto:"Vi que "+company+" esta crescendo , parabens",corpo:"Ola,\n\nAcompanho o crescimento da "+company+" no setor de "+setor+".\n\nEmpresa que cresce rapido em produto digital normalmente enfrenta um desafio especifico: a velocidade de desenvolvimento cresce mais rapido que a maturidade de seguranca , e o risco cresce junto.\n\nValeria 15 minutos para mostrar como outras empresas do mesmo segmento anteciparam esse problema?\n\nAbraço,\nAndrei Heimann | Conviso Application Security"},
+          {assunto:company+" + Conviso , vale 20 minutos?",corpo:"Ola, tudo bem?\n\nVi que "+company+" tem um time de engenharia ativo em "+setor+", exatamente o perfil onde a Conviso entrega mais resultado.\n\nEmpresa similar reduziu vulnerabilidades críticas em 70% e acelerou ISO 27001 em 60% apos integrar a Conviso Platform no pipeline.\n\nFaz sentido um papo de 20 minutos para eu entender como esta o processo de AppSec de voces hoje?\n\nAbraço,\nAndrei Heimann | AE Enterprise , Conviso Application Security"},
+          {assunto:"Uma pergunta sobre seguranca no ciclo de desenvolvimento",corpo:"Ola!\n\nPergunta direta: como voces identificam vulnerabilidades no codigo hoje , e automatizado no pipeline, manual, ou atraves de pentests pontuais?\n\nDependendo da resposta, posso te mostrar como empresas similares resolveram isso de forma estruturada com a Conviso Platform.\n\nVale um papo rápido?"},
+          {assunto:"Vi que "+company+" esta crescendo , parabens",corpo:"Ola,\n\nAcompanho o crescimento da "+company+" no setor de "+setor+".\n\nEmpresa que cresce rápido em produto digital normalmente enfrenta um desafio específico: a velocidade de desenvolvimento cresce mais rápido que a maturidade de seguranca , e o risco cresce junto.\n\nValeria 15 minutos para mostrar como outras empresas do mesmo segmento anteciparam esse problema?\n\nAbraço,\nAndrei Heimann | Conviso Application Security"},
         ],
         whatsapps:[
           "Oi [Nome], tudo bem? Sou o Andrei da Conviso Application Security. Vi que "+company+" tem um time de engenharia ativo em "+setor+". Trabalhamos com AppSec integrada ao pipeline de desenvolvimento. Valeria 15 minutos essa semana?",
-          "Oi [Nome]! Andrei, da Conviso AppSec. Direto ao ponto: empresa do mesmo setor da "+company+" reduziu 70% das vulnerabilidades criticas e acelerou ISO 27001 em 60% com nossa plataforma. Tenho um case rapido. Posso te mandar?",
-          "Oi [Nome], Andrei da Conviso Application Security. Voce cuida de seguranca de aplicacoes ou engenharia na "+company+"? Se sim, tenho algo relevante , 15 minutos essa semana. Se nao for voce, quem seria o contato certo?",
+          "Oi [Nome]! Andrei, da Conviso AppSec. Direto ao ponto: empresa do mesmo setor da "+company+" reduziu 70% das vulnerabilidades críticas e acelerou ISO 27001 em 60% com nossa plataforma. Tenho um case rápido. Posso te mandar?",
+          "Oi [Nome], Andrei da Conviso Application Security. Voce cuida de seguranca de aplicações ou engenharia na "+company+"? Se sim, tenho algo relevante , 15 minutos essa semana. Se não for voce, quem seria o contato certo?",
         ],
         cold_calls:[
-          "Bom dia [Nome], aqui e o Andrei da Conviso Application Security. Tenho 30 segundos? [PAUSA] Perfeito. Trabalho com seguranca de aplicacoes integrada ao ciclo de desenvolvimento , e a "+company+" tem exatamente o perfil onde a gente gera mais resultado em "+setor+". Empresas similares reduziram vulnerabilidades criticas em 70% sem frear o time de produto. Faz sentido eu te mostrar como funcionou? Quando voce tem 20 minutos?",
-          "[Nome], bom dia! Andrei da Conviso AppSec. Ligo porque a "+company+" apareceu no nosso radar. Uma pergunta: hoje voces tem algum processo automatizado de seguranca no pipeline , SAST, DAST, analise de dependencias? [ouvir] Entendi. E quando descobrem uma vulnerabilidade critica, qual e o processo de priorizacao e correcao hoje?",
-          "Oi [Nome], Andrei da Conviso AppSec. Vou ser rapido. Tenho um case de empresa de "+setor+" com perfil muito similar ao da "+company+" , reduziram 70% das vulns em producao e aceleraram a ISO 27001 em 60%. Vale 2 minutos agora ou prefere que eu ligue amanha?",
+          "Bom dia [Nome], aqui e o Andrei da Conviso Application Security. Tenho 30 segundos? [PAUSA] Perfeito. Trabalho com seguranca de aplicações integrada ao ciclo de desenvolvimento , e a "+company+" tem exatamente o perfil onde a gente gera mais resultado em "+setor+". Empresas similares reduziram vulnerabilidades críticas em 70% sem frear o time de produto. Faz sentido eu te mostrar como funcionou? Quando voce tem 20 minutos?",
+          "[Nome], bom dia! Andrei da Conviso AppSec. Ligo porque a "+company+" apareceu no nosso radar. Uma pergunta: hoje voces tem algum processo automatizado de seguranca no pipeline , SAST, DAST, analise de dependencias? [ouvir] Entendi. E quando descobrem uma vulnerabilidade crítica, qual e o processo de priorização e correção hoje?",
+          "Oi [Nome], Andrei da Conviso AppSec. Vou ser rápido. Tenho um case de empresa de "+setor+" com perfil muito similar ao da "+company+" , reduziram 70% das vulns em producao e aceleraram a ISO 27001 em 60%. Vale 2 minutos agora ou prefere que eu ligue amanha?",
         ],
         perguntas_spin:[
-          "SITUAÇÃO: Como esta estruturado hoje o processo de seguranca de aplicacoes , e manual, automatizado no pipeline, ou ainda nao tem processo formal?",
+          "SITUAÇÃO: Como esta estruturado hoje o processo de seguranca de aplicações , e manual, automatizado no pipeline, ou ainda não tem processo formal?",
           "SITUAÇÃO: Qual o tamanho do time de engenharia e quantos deploys por semana fazem hoje?",
           "SITUAÇÃO: Voces usam alguma ferramenta de SAST, SCA ou analise de dependencias integrada ao pipeline hoje?",
-          "SITUAÇÃO: Existe um time ou profissional dedicado de seguranca de aplicacoes?",
-          "PROBLEMA: Com que frequencia vulnerabilidades criticas chegam ate producao sem serem detectadas antes?",
-          "PROBLEMA: Quando uma vulnerabilidade e encontrada, qual e o processo de priorizacao e correcao? Tem SLA definido?",
+          "SITUAÇÃO: Existe um time ou profissional dedicado de seguranca de aplicações?",
+          "PROBLEMA: Com que frequencia vulnerabilidades críticas chegam ate producao sem serem detectadas antes?",
+          "PROBLEMA: Quando uma vulnerabilidade e encontrada, qual e o processo de priorização e correção? Tem SLA definido?",
           "PROBLEMA: Algum cliente enterprise ja exigiu relatorio de pentest ou evidencia de AppSec para fechar contrato?",
           "PROBLEMA: O time de dev tem cultura de seguranca, ou ainda e vista como responsabilidade exclusiva do time de infra?",
-          "IMPLICAÇÃO: Qual o custo estimado de remediacao de uma vuln critica em producao vs no desenvolvimento?",
-          "IMPLICAÇÃO: Voces estao em processo de certificacao ISO 27001, SOC 2 ou PCI-DSS? Qual o impacto de nao ter AppSec formalizada?",
+          "IMPLICAÇÃO: Qual o custo estimado de remediação de uma vuln crítica em producao vs no desenvolvimento?",
+          "IMPLICAÇÃO: Voces estao em processo de certificação ISO 27001, SOC 2 ou PCI-DSS? Qual o impacto de não ter AppSec formalizada?",
           "IMPLICAÇÃO: Se ocorrer um incidente de seguranca em producao, qual seria o impacto financeiro, reputacional e contratual?",
-          "NECESSIDADE: Se tivessem SAST, DAST e gestao de vulnerabilidades integrados no pipeline hoje, qual seria o impacto?",
+          "NECESSIDADE: Se tivessem SAST, DAST e gestão de vulnerabilidades integrados no pipeline hoje, qual seria o impacto?",
           "NECESSIDADE: O que precisaria acontecer para AppSec subir de prioridade na agenda , ou ja esta prioritaria?",
           "NECESSIDADE: Se eu conseguisse te mostrar como integrar seguranca no pipeline em 2 semanas sem impactar o roadmap, isso seria suficiente para uma POC?",
         ],
         objecoes:[
-          {objecao:"Ja usamos SonarQube / ferramenta interna",resposta:"SonarQube e otimo para qualidade de codigo. A diferenca com a Conviso Platform e a camada de gestao de vulnerabilidades com contexto de risco de negocio, DAST para aplicacoes em execucao, SCA para open source e o programa Security Champions. Posso mostrar como as duas se complementam em 20 minutos?"},
-          {objecao:"Nao temos budget para isso agora",resposta:"Entendo. Antes de fecharmos: qual o custo estimado de remediacao de uma vuln critica em producao, considerando horas de engenharia, rollback e risco regulatorio? Na maioria dos cases, o investimento na Conviso paga em um unico incidente evitado."},
-          {objecao:"Nossa TI nao tem capacidade de implementacao agora",resposta:"A integracao com GitHub, GitLab ou Azure DevOps leva em media 2 semanas e e conduzida pelo nosso time de CS , o time de voces nao precisa parar o roadmap."},
-          {objecao:"Nao e prioridade agora, temos outros projetos",resposta:"Faz sentido. Voces tem algum cliente enterprise ou processo de certificacao onde AppSec sera exigida nos proximos 6 meses? Normalmente esse tema sobe de prioridade antes do esperado."},
+          {objecao:"Ja usamos SonarQube / ferramenta interna",resposta:"SonarQube e otimo para qualidade de codigo. A diferenca com a Conviso Platform e a camada de gestão de vulnerabilidades com contexto de risco de negocio, DAST para aplicações em execucao, SCA para open source e o programa Security Champions. Posso mostrar como as duas se complementam em 20 minutos?"},
+          {objecao:"Não temos budget para isso agora",resposta:"Entendo. Antes de fecharmos: qual o custo estimado de remediação de uma vuln crítica em producao, considerando horas de engenharia, rollback e risco regulatorio? Na maioria dos cases, o investimento na Conviso paga em um único incidente evitado."},
+          {objecao:"Nossa TI não tem capacidade de implementacao agora",resposta:"A integração com GitHub, GitLab ou Azure DevOps leva em media 2 semanas e e conduzida pelo nosso time de CS , o time de voces não precisa parar o roadmap."},
+          {objecao:"Não e prioridade agora, temos outros projetos",resposta:"Faz sentido. Voces tem algum cliente enterprise ou processo de certificação onde AppSec sera exigida nos próximos 6 meses? Normalmente esse tema sobe de prioridade antes do esperado."},
           {objecao:"Ja fazemos pentest periodicamente",resposta:"Pentest pontual e um otimo comeco. A diferenca: com deploys frequentes, vulnerabilidades novas surgem entre um pentest e outro. A Conviso complementa com analise continua no pipeline."},
-          {objecao:"Precisamos envolver o time de engenharia antes",resposta:"Perfeito , e o caminho certo. Posso preparar uma demo tecnica com o Engineering Manager mostrando a integracao no pipeline real de voces. Quem seria o ponto de contato tecnico?"},
-          {objecao:"Ja tentamos uma ferramenta de AppSec e o time nao adotou",resposta:"O que nao funcionou , friccao na integracao, muitos falsos positivos, ou o time nao sabia priorizar os resultados? A Conviso tem um modelo de Security Champions especifico para resolver esse problema de adocao."},
-          {objecao:"Preferimos fazer internamente",resposta:"Faz sentido. A Conviso nao substitui o time interno , ela da a plataforma e os dados para o time trabalhar com mais eficiencia. Qual e a cobertura atual em aplicacoes monitoradas vs total do portfolio?"},
+          {objecao:"Precisamos envolver o time de engenharia antes",resposta:"Perfeito , e o caminho certo. Posso preparar uma demo tecnica com o Engineering Manager mostrando a integração no pipeline real de voces. Quem seria o ponto de contato tecnico?"},
+          {objecao:"Ja tentamos uma ferramenta de AppSec e o time não adotou",resposta:"O que não funcionou , friccao na integração, muitos falsos positivos, ou o time não sabia priorizar os resultados? A Conviso tem um modelo de Security Champions específico para resolver esse problema de adocao."},
+          {objecao:"Preferimos fazer internamente",resposta:"Faz sentido. A Conviso não substitui o time interno , ela da a plataforma e os dados para o time trabalhar com mais eficiencia. Qual e a cobertura atual em aplicações monitoradas vs total do portfolio?"},
         ]
       },
       proximos_passos:{
-        ae:["Mapear organograma no LinkedIn Sales Navigator , foco em CISO, CTO e Head de Engenharia da "+company,"Pesquisar vagas abertas de AppSec Engineer, Security Engineer e DevSecOps , sinal de dor ativa","Verificar certificacao ISO 27001 publica da "+company+" , ausencia e oportunidade direta","Buscar CVEs publicos associados a produtos da "+company+" no NVD ou GitHub Security Advisories","Preparar business case com custo de remediacao de vuln em producao vs investimento na Conviso","Enviar InMail personalizado ao CISO ou CTO referenciando o contexto regulatorio do setor de "+setor],
-        bdr:["Cold call focado em CISO e CTO , nao confundir com outros perfis de seguranca","Enviar WhatsApp com Loom personalizado referenciando o case mais relevante do segmento","Disparar sequencia de 4 emails (Custo de Vuln, Case, ISO 27001, FUP Final)","Monitorar sinais via 6Sense , alertar AE sobre contas com intencao ativa","Mapear eventos do setor: Mind The Sec, Security Leaders, CIAB, eventos de tecnologia"],
-        prazo:"Primeira abordagem em ate 48 horas , prioridade Tier 1 se ha sinal de certificacao, incidente ou cliente enterprise exigindo AppSec"
+        ae:["Mapear organograma no LinkedIn Sales Navigator , foco em CISO, CTO e Head de Engenharia da "+company,"Pesquisar vagas abertas de AppSec Engineer, Security Engineer e DevSecOps , sinal de dor ativa","Verificar certificação ISO 27001 publica da "+company+" , ausencia e oportunidade direta","Buscar CVEs públicos associados a produtos da "+company+" no NVD ou GitHub Security Advisories","Preparar business case com custo de remediação de vuln em producao vs investimento na Conviso","Enviar InMail personalizado ao CISO ou CTO referenciando o contexto regulatorio do setor de "+setor],
+        bdr:["Cold call focado em CISO e CTO , não confundir com outros perfis de seguranca","Enviar WhatsApp com Loom personalizado referenciando o case mais relevante do segmento","Disparar sequência de 4 emails (Custo de Vuln, Case, ISO 27001, FUP Final)","Monitorar sinais via 6Sense , alertar AE sobre contas com intencao ativa","Mapear eventos do setor: Mind The Sec, Security Leaders, CIAB, eventos de tecnologia"],
+        prazo:"Primeira abordagem em ate 48 horas , prioridade Tier 1 se ha sinal de certificação, incidente ou cliente enterprise exigindo AppSec"
       }
     };
   }
@@ -1026,9 +1153,66 @@ function AccountsView(props) {
 
 
 // ── INSIGHTS VIEW ─────────────────────────────────────────────────────────────
+function SemiCircleChart(props) {
+  var convSteps = props.convSteps||[];
+  var colors=["#0f172a","#0369a1","#7c3aed","#065f46","#991b1b"];
+  var radii=[90,76,62,48,34];
+  var steps=convSteps.slice(0,5);
+  var pathData=steps.map(function(step,i){
+    var pct=step.pct/100;
+    var r=radii[i];
+    if(pct<=0) return null;
+    var startA=Math.PI; var endA=Math.PI+(Math.PI*pct);
+    var x1=100+r*Math.cos(startA); var y1=100+r*Math.sin(startA);
+    var x2=100+r*Math.cos(endA);   var y2=100+r*Math.sin(endA);
+    var large=pct>0.5?1:0;
+    return {d:"M "+x1+" "+y1+" A "+r+" "+r+" 0 "+large+" 1 "+x2+" "+y2,color:colors[i],key:i};
+  }).filter(Boolean);
+  return (
+    <svg width="200" height="110" viewBox="0 0 200 110">
+      {pathData.map(function(p){return <path key={p.key} d={p.d} fill="none" stroke={p.color} strokeWidth="10" strokeLinecap="round" opacity="0.85"/>;})}
+      <text x="100" y="98" textAnchor="middle" fontSize="11" fill="#94a3b8">0%</text>
+      <text x="10" y="105" textAnchor="middle" fontSize="11" fill="#94a3b8">Map.</text>
+      <text x="190" y="105" textAnchor="middle" fontSize="11" fill="#065f46">Conv.</text>
+    </svg>
+  );
+}
+
 function InsightsView(props) {
   var accounts = props.accounts;
   var total = accounts.length;
+
+  // ── SVG Donut chart helper
+  function buildDonutPaths(segments, cx, cy, r, innerR) {
+    var total2=segments.reduce(function(s,seg){return s+(seg.value||0);},0)||1;
+    var startAngle=-Math.PI/2;
+    var result=[];
+    for(var i=0;i<segments.length;i++){
+      var seg=segments[i];
+      var angle=(seg.value/total2)*Math.PI*2;
+      var endAngle=startAngle+angle;
+      var x1=cx+r*Math.cos(startAngle); var y1=cy+r*Math.sin(startAngle);
+      var x2=cx+r*Math.cos(endAngle);   var y2=cy+r*Math.sin(endAngle);
+      var ix1=cx+innerR*Math.cos(endAngle); var iy1=cy+innerR*Math.sin(endAngle);
+      var ix2=cx+innerR*Math.cos(startAngle); var iy2=cy+innerR*Math.sin(startAngle);
+      var large=angle>Math.PI?1:0;
+      if(seg.value>0) result.push({d:"M "+x1+" "+y1+" A "+r+" "+r+" 0 "+large+" 1 "+x2+" "+y2+" L "+ix1+" "+iy1+" A "+innerR+" "+innerR+" 0 "+large+" 0 "+ix2+" "+iy2+" Z",fill:seg.color,key:i});
+      startAngle=endAngle;
+    }
+    return result;
+  }
+  function DonutChart(dprops) {
+    var segments=dprops.segments; var size=dprops.size||120; var hole=dprops.hole||0.62;
+    var cx=size/2; var cy=size/2; var r=size/2-8; var innerR=r*hole;
+    var pathData=buildDonutPaths(segments,cx,cy,r,innerR);
+    return (
+      <svg width={size} height={size} viewBox={"0 0 "+size+" "+size}>
+        {pathData.map(function(p){return <path key={p.key} d={p.d} fill={p.fill} opacity="0.9"/>;})}
+        {dprops.centerLabel&&<text x={cx} y={cy-5} textAnchor="middle" fontSize="18" fontWeight="800" fill="#0f172a">{dprops.centerLabel}</text>}
+        {dprops.centerSub&&<text x={cx} y={cy+14} textAnchor="middle" fontSize="10" fill="#94a3b8">{dprops.centerSub}</text>}
+      </svg>
+    );
+  }
 
   // ── Funnel by status
   var funnel = STATUS_ORDER.map(function(s) {
@@ -1132,7 +1316,7 @@ function InsightsView(props) {
         <div style={{background:"rgba(255,255,255,.95)",border:"1px solid rgba(228,235,244,.8)",borderRadius:20,padding:"22px 24px",boxShadow:"0 4px 24px rgba(15,23,42,.07)"}}>
           <div style={{fontSize:10,fontWeight:700,color:"#10b981",letterSpacing:2,textTransform:"uppercase",marginBottom:20,display:"flex",alignItems:"center",gap:6}}>
             <div style={{width:3,height:14,background:"linear-gradient(180deg,#10b981,#059669)",borderRadius:3,boxShadow:"0 0 8px rgba(16,185,129,.4)"}}/>
-            Funil de Conversao
+            Funil de Conversão
           </div>
           {convSteps.map(function(step, i) {
             var colors = ["#0f172a","#0369a1","#7c3aed","#b45309","#065f46"];
@@ -1183,7 +1367,7 @@ function InsightsView(props) {
         <div style={{background:"rgba(255,255,255,.95)",border:"1px solid rgba(228,235,244,.8)",borderRadius:20,padding:"22px 24px",boxShadow:"0 4px 24px rgba(15,23,42,.07)"}}>
           <div style={{fontSize:10,fontWeight:700,color:"#10b981",letterSpacing:2,textTransform:"uppercase",marginBottom:18,display:"flex",alignItems:"center",gap:6}}>
             <div style={{width:3,height:14,background:"linear-gradient(180deg,#10b981,#059669)",borderRadius:3,boxShadow:"0 0 8px rgba(16,185,129,.4)"}}/>
-            Distribuicao por Fit
+            Distribuição por Fit
           </div>
           {byFit.map(function(f) {
             return (
@@ -1203,7 +1387,7 @@ function InsightsView(props) {
         <div style={{background:"rgba(255,255,255,.95)",border:"1px solid rgba(228,235,244,.8)",borderRadius:20,padding:"22px 24px",boxShadow:"0 4px 24px rgba(15,23,42,.07)"}}>
           <div style={{fontSize:10,fontWeight:700,color:"#10b981",letterSpacing:2,textTransform:"uppercase",marginBottom:18,display:"flex",alignItems:"center",gap:6}}>
             <div style={{width:3,height:14,background:"linear-gradient(180deg,#10b981,#059669)",borderRadius:3,boxShadow:"0 0 8px rgba(16,185,129,.4)"}}/>
-            Distribuicao por Tier
+            Distribuição por Tier
           </div>
           {byTier.map(function(t) {
             return (
@@ -1266,6 +1450,67 @@ function InsightsView(props) {
         </div>
       </div>
 
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18,marginTop:18}}>
+        <div style={{background:"rgba(255,255,255,.95)",border:"1px solid rgba(228,235,244,.8)",borderRadius:20,padding:"22px 24px",boxShadow:"0 4px 24px rgba(15,23,42,.07)"}}>
+          <div style={{fontSize:10,fontWeight:700,color:"#10b981",letterSpacing:2,textTransform:"uppercase",marginBottom:18,display:"flex",alignItems:"center",gap:6}}>
+            <div style={{width:3,height:14,background:"linear-gradient(180deg,#10b981,#059669)",borderRadius:3,boxShadow:"0 0 8px rgba(16,185,129,.4)"}}/>
+            Fit Score, Visão Donut
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:24}}>
+            <DonutChart size={120} hole={0.62}
+              segments={byFit.map(function(f){return {value:f.count,color:f.color};})}
+              centerLabel={total} centerSub="contas"/>
+            <div style={{flex:1}}>
+              {byFit.map(function(f){return (
+                <div key={f.fit} style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+                  <div style={{width:10,height:10,borderRadius:"50%",background:f.color,flexShrink:0}}/>
+                  <div style={{fontSize:11,color:"#334155",flex:1}}>{"FIT "+f.fit}</div>
+                  <div style={{fontSize:12,fontWeight:700,color:f.color}}>{f.count}</div>
+                  <div style={{fontSize:10,color:"#94a3b8"}}>{f.pct+"%"}</div>
+                </div>
+              );})}
+            </div>
+          </div>
+        </div>
+        <div style={{background:"rgba(255,255,255,.95)",border:"1px solid rgba(228,235,244,.8)",borderRadius:20,padding:"22px 24px",boxShadow:"0 4px 24px rgba(15,23,42,.07)"}}>
+          <div style={{fontSize:10,fontWeight:700,color:"#10b981",letterSpacing:2,textTransform:"uppercase",marginBottom:18,display:"flex",alignItems:"center",gap:6}}>
+            <div style={{width:3,height:14,background:"linear-gradient(180deg,#10b981,#059669)",borderRadius:3,boxShadow:"0 0 8px rgba(16,185,129,.4)"}}/>
+            Funil, Semicírculo
+          </div>
+          <div style={{display:"flex",justifyContent:"center",marginBottom:12}}>
+            <SemiCircleChart convSteps={convSteps}/>
+          </div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",justifyContent:"center"}}>
+            {convSteps.map(function(step,i){
+              var colors=["#0f172a","#0369a1","#7c3aed","#065f46","#991b1b"];
+              return <div key={step.label} style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:8,height:8,borderRadius:"50%",background:colors[i]}}/><span style={{fontSize:10,color:"#64748b"}}>{step.label+": "+step.pct+"%"}</span></div>;
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div style={{background:"rgba(255,255,255,.95)",border:"1px solid rgba(228,235,244,.8)",borderRadius:20,padding:"22px 24px",boxShadow:"0 4px 24px rgba(15,23,42,.07)",marginTop:18}}>
+        <div style={{fontSize:10,fontWeight:700,color:"#10b981",letterSpacing:2,textTransform:"uppercase",marginBottom:18,display:"flex",alignItems:"center",gap:6}}>
+          <div style={{width:3,height:14,background:"linear-gradient(180deg,#10b981,#059669)",borderRadius:3,boxShadow:"0 0 8px rgba(16,185,129,.4)"}}/>
+          Métricas de Velocidade
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:14}}>
+          {[
+            {label:"Média por Semana", value:total?(weeks.reduce(function(s,w){return s+w.count;},0)/Math.max(1,weeks.filter(function(w){return w.count>0;}).length)).toFixed(1):0, sub:"contas mapeadas", color:"#0369a1"},
+            {label:"Melhor Semana",    value:Math.max.apply(null,weeks.map(function(w){return w.count;})), sub:"contas em uma semana", color:"#7c3aed"},
+            {label:"Taxa de Avanço",   value:total?Math.round(contacted/total*100)+"%":"0%", sub:"mapeado para contatado", color:"#059669"},
+            {label:"Taxa de Reunião",  value:contacted?Math.round(meeting/contacted*100)+"%":"0%", sub:"contatado para reunião", color:"#065f46"},
+          ].map(function(m){return (
+            <div key={m.label} style={{background:"#f8fafc",border:"1px solid #e8edf4",borderRadius:14,padding:"16px 18px"}}>
+              <div style={{fontSize:9,color:"#94a3b8",fontWeight:600,marginBottom:8,textTransform:"uppercase",letterSpacing:.8}}>{m.label}</div>
+              <div style={{fontSize:28,fontWeight:800,color:m.color,lineHeight:1,marginBottom:4}}>{m.value}</div>
+              <div style={{fontSize:11,color:"#94a3b8"}}>{m.sub}</div>
+            </div>
+          );})}
+        </div>
+      </div>
+
     </div>
   );
 }
@@ -1278,6 +1523,7 @@ export default function App() {
   var [openAcc, setOpenAcc] = useState(null);
   var [toast, setToast] = useState(null);
   var [sidebarOpen, setSidebarOpen] = useState(true);
+  var [seqCount, setSeqCount] = useState(0);
 
   function showToast(msg, color) {
     setToast({msg:msg,color:color||"#059669"});
@@ -1285,9 +1531,14 @@ export default function App() {
   }
 
   useEffect(function() {
-    storageList("acc:").then(function(keys) {
-      if (!keys.length) { setLoading(false); return; }
-      Promise.all(keys.map(storageGet)).then(function(items) {
+    Promise.all([
+      storageList("acc:"),
+      storageList("seq:")
+    ]).then(function(results) {
+      var accKeys = results[0]; var seqKeys = results[1];
+      setSeqCount(seqKeys.length);
+      if (!accKeys.length) { setLoading(false); return; }
+      return Promise.all(accKeys.map(storageGet)).then(function(items) {
         var valid = items.filter(Boolean).sort(function(a,b){return (b.savedAt||0)-(a.savedAt||0);});
         setAccounts(valid); setLoading(false);
       });
@@ -1350,38 +1601,48 @@ export default function App() {
   ].join("");
 
   var NAV = [
-    {id:"search",   emoji:"🔍", label:"Busca"},
-    {id:"accounts", emoji:"📁", label:"Contas",    count:accounts.length||null},
-    {id:"sequences",emoji:"📬", label:"Sequências"},
-    {id:"pipeline", emoji:"📊", label:"Pipeline"},
-    {id:"insights", emoji:"📈", label:"Insights"},
+    {id:"search",    emoji:"🔍", label:"Busca"},
+    {id:"accounts",  emoji:"📁", label:"Contas",     count:accounts.length||null},
+    {id:"sequences", emoji:"📬", label:"Sequências"},
+    {id:"biblioteca",emoji:"📚", label:"Biblioteca", count:seqCount||null},
+    {id:"pipeline",  emoji:"📊", label:"Pipeline"},
+    {id:"relatorios",emoji:"📈", label:"Relatórios"},
   ];
 
   return (
     <div style={{display:"flex",height:"100vh",background:"#f8fafc",overflow:"hidden"}}>
       <style>{css}</style>
 
-      <div className="sidebar" style={{width:sidebarOpen?210:64,background:"#fff",borderRight:"1px solid #e8edf4",display:"flex",flexDirection:"column",flexShrink:0,boxShadow:"4px 0 24px rgba(15,23,42,.06)",position:"relative",overflow:"hidden"}}>
+      <div className="sidebar" style={{width:sidebarOpen?224:64,background:"#fff",borderRight:"1px solid #e8edf4",display:"flex",flexDirection:"column",flexShrink:0,boxShadow:"4px 0 24px rgba(15,23,42,.06)",position:"relative",overflow:"hidden"}}>
         <div style={{height:3,background:"linear-gradient(90deg,#10b981,#0ea5e9,#8b5cf6)",flexShrink:0}}/>
 
-        <div style={{padding:"14px 12px 10px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
-          <div style={{display:"flex",alignItems:"center",gap:10,overflow:"hidden",flex:1}}>
-            <div style={{width:34,height:34,borderRadius:10,background:"linear-gradient(135deg,#10b981,#059669)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 12px rgba(16,185,129,.4)",flexShrink:0}}>
+        {sidebarOpen ? (
+          <div style={{padding:"14px 14px 10px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
+            <div style={{display:"flex",alignItems:"center",gap:9,overflow:"hidden",flex:1,minWidth:0}}>
+              <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,#10b981,#059669)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 12px rgba(16,185,129,.4)",flexShrink:0}}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,.4)" strokeWidth="1.8"/><circle cx="12" cy="12" r="5" stroke="rgba(255,255,255,.7)" strokeWidth="1.8"/><circle cx="12" cy="12" r="2" fill="white"/></svg>
+              </div>
+              <div style={{minWidth:0,overflow:"hidden"}}>
+                <div style={{fontSize:12.5,fontWeight:800,color:"#0f172a",letterSpacing:"-0.3px",lineHeight:1.2,whiteSpace:"nowrap"}}>BDR Helper <span style={{color:"#10b981"}}>Pro</span></div>
+                <div style={{fontSize:7.5,color:"#10b981",fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",whiteSpace:"nowrap"}}>PROSPECTING TOOL V1</div>
+              </div>
+            </div>
+            <button className="toggle-btn" onClick={function(){setSidebarOpen(false);}} title="Recolher menu"
+              style={{width:26,height:26,borderRadius:7,border:"none",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",flexShrink:0,padding:0}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+          </div>
+        ) : (
+          <div style={{padding:"14px 0 10px",display:"flex",flexDirection:"column",alignItems:"center",gap:8,flexShrink:0}}>
+            <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#10b981,#059669)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 12px rgba(16,185,129,.4)"}}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,.4)" strokeWidth="1.8"/><circle cx="12" cy="12" r="5" stroke="rgba(255,255,255,.7)" strokeWidth="1.8"/><circle cx="12" cy="12" r="2" fill="white"/></svg>
             </div>
-            <div className={"sidebar-label " + (sidebarOpen?"visible":"hidden")} style={{minWidth:0}}>
-              <div style={{fontSize:13,fontWeight:800,color:"#0f172a",letterSpacing:"-0.3px",lineHeight:1.2,whiteSpace:"nowrap"}}>BDR Helper <span style={{color:"#10b981"}}>Pro</span></div>
-              <div style={{fontSize:8,color:"#10b981",fontWeight:700,letterSpacing:2,textTransform:"uppercase",whiteSpace:"nowrap"}}>PROSPECTING TOOL V1 Beta</div>
-            </div>
+            <button className="toggle-btn" onClick={function(){setSidebarOpen(true);}} title="Expandir menu"
+              style={{width:26,height:26,borderRadius:7,border:"none",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",padding:0}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
           </div>
-          <button className="toggle-btn" onClick={function(){setSidebarOpen(function(v){return !v;});}} title={sidebarOpen?"Recolher menu":"Expandir menu"}
-            style={{width:28,height:28,borderRadius:8,border:"none",background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#94a3b8",flexShrink:0,padding:0,marginLeft:sidebarOpen?4:0}}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-              style={{transform:sidebarOpen?"":"rotate(180deg)",transition:"transform .3s cubic-bezier(.22,1,.36,1)"}}>
-              <polyline points="15 18 9 12 15 6"/>
-            </svg>
-          </button>
-        </div>
+        )}
 
         <div style={{height:1,background:"#f1f5f9",margin:"0 10px 8px",flexShrink:0}}/>
 
@@ -1437,12 +1698,13 @@ export default function App() {
               {nav==="search"    && <SearchView onSave={saveAccount}/>}
               {nav==="accounts"  && <AccountsView accounts={accounts} onOpen={setOpenAcc} onStatusChange={updateStatus} onDelete={deleteAccount}/>}
               {nav==="sequences" && <SequenceView accounts={accounts} showToast={showToast}/>}
-              {nav==="insights"  && <InsightsView accounts={accounts}/>}
+              {nav==="relatorios"&& <InsightsView accounts={accounts}/>}
+              {nav==="biblioteca" && <BibliotecaView showToast={showToast} onCountChange={setSeqCount}/>}
               {nav==="pipeline"  && (
                 <div>
                   <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>Pipeline</div>
-                  <div style={{fontSize:13,color:"#64748b",marginBottom:24}}>Visao kanban das suas contas por estagio da prospecao.</div>
-                  <PipelineView accounts={accounts} onOpen={setOpenAcc}/>
+                  <div style={{fontSize:13,color:"#64748b",marginBottom:24}}>Arraste os cards entre colunas para avançar ou recuar o estágio da prospecção.</div>
+                  <PipelineView accounts={accounts} onOpen={setOpenAcc} onStatusChange={updateStatus}/>
                 </div>
               )}
             </div>
