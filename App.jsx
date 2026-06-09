@@ -1,17 +1,36 @@
 import { useState, useEffect, useRef } from "react";
 
-// ── STORAGE ──────────────────────────────────────────────────────────────────
+// ── STORAGE — localStorage (persists across reloads) ─────────────────────────
+var STORAGE_PREFIX = "bdrhelper_";
 async function storageGet(key) {
-  try { var r = await window.storage.get(key); return r ? JSON.parse(r.value) : null; } catch(e) { return null; }
+  try {
+    var raw = localStorage.getItem(STORAGE_PREFIX + key);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
 }
 async function storageSet(key, val) {
-  try { await window.storage.set(key, JSON.stringify(val)); return true; } catch(e) { return false; }
+  try {
+    localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(val));
+    return true;
+  } catch(e) { return false; }
 }
 async function storageList(prefix) {
-  try { var r = await window.storage.list(prefix); return r ? r.keys : []; } catch(e) { return []; }
+  try {
+    var keys = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.startsWith(STORAGE_PREFIX + prefix)) {
+        keys.push(k.slice(STORAGE_PREFIX.length));
+      }
+    }
+    return keys;
+  } catch(e) { return []; }
 }
 async function storageDel(key) {
-  try { await window.storage.delete(key); return true; } catch(e) { return false; }
+  try {
+    localStorage.removeItem(STORAGE_PREFIX + key);
+    return true;
+  } catch(e) { return false; }
 }
 
 // ── CONSTANTS ────────────────────────────────────────────────────────────────
@@ -185,7 +204,7 @@ function SequenceView(props) {
       <div>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:28,flexWrap:"wrap",gap:12}}>
           <div>
-            <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>Sequencias Salvas</div>
+            <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>Sequências Salvas</div>
             <div style={{fontSize:13,color:"#64748b"}}>{saved.length + " sequência" + (saved.length !== 1 ? "s" : "") + " na biblioteca"}</div>
           </div>
           <button onClick={function(){setView("builder");}} style={{background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",border:"none",borderRadius:12,padding:"11px 22px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>
@@ -200,7 +219,7 @@ function SequenceView(props) {
             <div style={{fontSize:12,color:"#94a3b8"}}>Gere uma sequencia e clique em Salvar na Biblioteca</div>
           </div>
         ) : (
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:16}}>
+          <div className="card-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:16}}>
             {saved.map(function(seq) {
               var fc = FIT_CONFIG[seq.account && seq.account.fit] || FIT_CONFIG.ALTO;
               return (
@@ -242,7 +261,7 @@ function SequenceView(props) {
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:28,flexWrap:"wrap",gap:12}}>
         <div>
-          <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>Gerador de Sequencias</div>
+          <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>Gerador de Sequências</div>
           <div style={{fontSize:13,color:"#64748b"}}>Selecione a conta e o perfil do stakeholder para gerar uma cadencia personalizada de 6 toques.</div>
         </div>
         <button onClick={function(){setView("library");}} style={{background:"#f8fafc",color:"#475569",border:"1.5px solid #e2e8f0",borderRadius:12,padding:"11px 22px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:6}}>
@@ -307,7 +326,7 @@ function SequenceView(props) {
       <div style={{display:"flex",gap:12,marginBottom:32}}>
         <button onClick={generate} disabled={!selAcc || !selProfile}
           style={{background: selAcc && selProfile ? "linear-gradient(135deg,#10b981,#059669)" : "#e2e8f0",color: selAcc && selProfile ? "#fff" : "#94a3b8",border:"none",borderRadius:12,padding:"14px 32px",fontSize:13,fontWeight:600,cursor: selAcc && selProfile ? "pointer" : "not-allowed",fontFamily:"inherit",boxShadow: selAcc && selProfile ? "0 4px 14px rgba(16,185,129,.35)" : "none",transition:"all .2s"}}>
-          Gerar Sequencia de 6 Toques
+          Gerar Sequência de 6 Toques
         </button>
         {generated && (
           <button onClick={saveSeq} style={{background:"#fff",color:"#059669",border:"1.5px solid rgba(16,185,129,.35)",borderRadius:12,padding:"14px 24px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit",transition:"all .2s"}}
@@ -501,7 +520,7 @@ function PipelineView(props) {
   }
 
   return (
-    <div style={{overflowX:"auto",paddingBottom:16}}>
+    <div className="pipeline-scroll" style={{overflowX:"auto",paddingBottom:16}}>
       <div style={{display:"flex",gap:14,minWidth:900}}>
         {STATUS_ORDER.map(function(col) {
           var sc = STATUS_CONFIG[col];
@@ -574,7 +593,7 @@ function AccountModal(props) {
     try { var parts=path.split("."); var cur=d; for(var i=0;i<parts.length;i++){cur=cur[parts[i]];if(cur==null)return null;} return cur; } catch(e){return null;}
   }
 
-  var tabs=[{id:"overview",label:"Visão Geral"},{id:"stakeholders",label:"Stakeholders"},{id:"messages",label:"Mensagens"},{id:"spin",label:"SPIN & Objeções"},{id:"plan",label:"Plano de Acao"}];
+  var tabs=[{id:"overview",label:"Visão Geral"},{id:"stakeholders",label:"Stakeholders"},{id:"messages",label:"Mensagens"},{id:"spin",label:"SPIN & Objeções"},{id:"plan",label:"Plano de Ação"}];
   var empresa=sd("empresa")||{};
   var stakeholders=safeArr(sd("stakeholders"));
   var dores=safeArr(sd("dores.principais"));
@@ -595,7 +614,7 @@ function AccountModal(props) {
 
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(15,23,42,.75)",zIndex:200,display:"flex",alignItems:"flex-start",justifyContent:"center",padding:"20px 16px",overflowY:"auto",backdropFilter:"blur(10px)"}}>
-      <div style={{background:"rgba(255,255,255,.99)",borderRadius:24,width:"100%",maxWidth:820,boxShadow:"0 32px 100px rgba(15,23,42,.3)"}}>
+      <div className="modal-box" style={{background:"rgba(255,255,255,.99)",borderRadius:24,width:"100%",maxWidth:820,boxShadow:"0 32px 100px rgba(15,23,42,.3)"}}>
         <div style={{padding:"22px 28px 0",borderBottom:"1px solid #f1f5f9"}}>
           <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:16,marginBottom:16}}>
             <div style={{flex:1,minWidth:0}}>
@@ -618,7 +637,7 @@ function AccountModal(props) {
               <button onClick={props.onClose} style={{background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:10,padding:"7px 14px",cursor:"pointer",color:"#64748b",fontSize:12,fontWeight:600,fontFamily:"inherit"}}>Fechar</button>
             </div>
           </div>
-          <div style={{display:"flex",gap:0,overflowX:"auto"}}>
+          <div className="modal-tabs" style={{display:"flex",gap:0,overflowX:"auto"}}>
             {tabs.map(function(tab){var active=activeTab===tab.id;return <button key={tab.id} onClick={function(){setActiveTab(tab.id);}} style={{padding:"10px 16px",border:"none",borderBottom:"2.5px solid "+(active?"#10b981":"transparent"),background:"transparent",color:active?"#059669":"#94a3b8",cursor:"pointer",fontFamily:"inherit",fontSize:12,fontWeight:active?700:500,transition:"all .15s",whiteSpace:"nowrap"}}>{tab.label}</button>;})}
           </div>
         </div>
@@ -640,7 +659,7 @@ function AccountModal(props) {
 
           {activeTab==="stakeholders"&&(
             <Sec title="Organograma de Stakeholders">
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+              <div className="modal-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
                 {stakeholders.map(function(s,i){
                   var pc=s.prioridade==="PRIMARIO"?"#065f46":s.prioridade==="SECUNDARIO"?"#92400e":"#475569";
                   var uc=s.urgencia==="Alta"?"#991b1b":s.urgencia==="Media"||s.urgencia==="Média"?"#92400e":"#64748b";
@@ -701,9 +720,9 @@ function AccountModal(props) {
             <div>
               <Sec title="Perguntas SPIN">
                 {spin.map(function(q,i){
-                  var tipo=q.startsWith("SITUAÇÃO")||q.startsWith("SITUACAO")?"S":q.startsWith("PROBLEMA")?"P":q.startsWith("IMPLICAÇÃO")||q.startsWith("IMPLICACAO")?"I":"N";
+                  var tipo=q.startsWith("SITUAÇÃO")||q.startsWith("SITUAÇÃO")?"S":q.startsWith("PROBLEMA")?"P":q.startsWith("IMPLICAÇÃO")||q.startsWith("IMPLICAÇÃO")?"I":"N";
                   var tc=tipo==="S"?"#0ea5e9":tipo==="P"?"#92400e":tipo==="I"?"#991b1b":"#065f46";
-                  var clean=q.replace(/^(SITUAÇÃO|SITUACAO|PROBLEMA|IMPLICAÇÃO|IMPLICACAO|NECESSIDADE): /,"");
+                  var clean=q.replace(/^(SITUAÇÃO|SITUAÇÃO|PROBLEMA|IMPLICAÇÃO|IMPLICAÇÃO|NECESSIDADE): /,"");
                   return (
                     <div key={i} style={{display:"flex",gap:10,padding:"10px 0",borderBottom:"1px solid #f1f5f9",alignItems:"flex-start"}}>
                       <span style={{background:tc+"20",border:"1px solid "+tc+"50",color:tc,borderRadius:6,padding:"2px 8px",fontSize:9,fontWeight:800,flexShrink:0,marginTop:1}}>{tipo}</span>
@@ -720,7 +739,7 @@ function AccountModal(props) {
                       <div key={i} style={{background:"#f8fafc",border:"1.5px solid #e8edf4",borderRadius:14,padding:"14px 16px",marginBottom:10}}>
                         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8,gap:8}}>
                           <div style={{fontSize:12,fontWeight:700,color:"#92400e",lineHeight:1.4,flex:1}}>{'"'+o.objeção+'"'}</div>
-                          <CopyBtn text={'"'+o.objeção+'"\n-> '+o.resposta}/>
+                          <CopyBtn text={'"'+o.objeção+'"\n→ '+o.resposta}/>
                         </div>
                         <div style={{fontSize:12,color:"#334155",lineHeight:1.65}}>{"→ "+o.resposta}</div>
                       </div>
@@ -734,10 +753,10 @@ function AccountModal(props) {
           {activeTab==="plan"&&(
             <div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:18}}>
-                <Sec title="AE , Ações Imediatas">
+                <Sec title="AE — Ações Imediatas">
                   {ae.map(function(a,i){return <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"8px 0",borderBottom:"1px solid #f1f5f9",gap:8}}><div style={{display:"flex",gap:8,flex:1}}><span style={{color:"#10b981",flexShrink:0,fontWeight:700}}>{">"}</span><span style={{fontSize:12,color:"#334155",lineHeight:1.5}}>{a}</span></div><CopyBtn text={a}/></div>;})}
                 </Sec>
-                <Sec title="BDR , Ações de Suporte">
+                <Sec title="BDR — Ações de Suporte">
                   {bdr.map(function(a,i){return <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"8px 0",borderBottom:"1px solid #f1f5f9",gap:8}}><div style={{display:"flex",gap:8,flex:1}}><span style={{color:"#f59e0b",flexShrink:0,fontWeight:700}}>{">"}</span><span style={{fontSize:12,color:"#334155",lineHeight:1.5}}>{a}</span></div><CopyBtn text={a}/></div>;})}
                 </Sec>
               </div>
@@ -833,7 +852,7 @@ function BibliotecaView(props) {
     <div>
       <div style={{marginBottom:28}}>
         <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>Biblioteca</div>
-        <div style={{fontSize:13,color:"#64748b"}}>{seqs.length+" sequência"+(seqs.length!==1?"s":"")+" salva"+(seqs.length!==1?"s":"")+" , todas as cadências geradas ficam aqui."}</div>
+        <div style={{fontSize:13,color:"#64748b"}}>{seqs.length+" sequência"+(seqs.length!==1?"s":"")+" salva"+(seqs.length!==1?"s":"")+" — todas as cadências geradas ficam aqui."}</div>
       </div>
 
       {seqs.length===0 ? (
@@ -940,43 +959,43 @@ function SearchView(props) {
     if (!noticias.length) noticias = [{titulo:"Buscar noticias recentes de "+company,resumo:"Pesquise '"+company+" seguranca ISO vulnerabilidade' no Google News.",relevancia:"Trigger identification",url:""}];
     return {
       empresa:{nome:company,setor:setor,resumo:resumo,tamanho:funcionarios||(tier==="Tier 1"?"Grande porte":"Medio porte"),faturamento:faturamento||null,clientes:clientes||null,estagio:"Consolidada / Scale-up",bolsa:bolsa||(isFintech||isSaaS?"Verificar B3/Nasdaq":"Capital fechado")},
-      fit:{score:"ALTO",justificativa:company+" atua em "+setor+", vertical de alta aderencia ao ICP da Conviso Application Security. Empresas nesse perfil tem times de desenvolvimento ativos e pressao crescente por AppSec formal de clientes e reguladores.",solucoes_conviso:["Conviso Platform","SAST , Analise Estatica","DAST , Teste Dinamico","SCA , Open Source Security","Gestão de Vulnerabilidades","Pentest Continuo","Security Champions Program"],use_cases:["SAST e DAST integrados ao pipeline CI/CD","Gestão centralizada de vulnerabilidades com SLA","Pentest continuo em APIs e aplicações web","Security Champions , devs como multiplicadores","Compliance ISO 27001 e PCI-DSS acelerado"]},
+      fit:{score:"ALTO",justificativa:company+" atua em "+setor+", vertical de alta aderencia ao ICP da Conviso Application Security. Empresas nesse perfil tem times de desenvolvimento ativos e pressao crescente por AppSec formal de clientes e reguladores.",solucoes_conviso:["Conviso Platform","SAST — Analise Estatica","DAST — Teste Dinamico","SCA — Open Source Security","Gestão de Vulnerabilidades","Pentest Continuo","Security Champions Program"],use_cases:["SAST e DAST integrados ao pipeline CI/CD","Gestão centralizada de vulnerabilidades com SLA","Pentest continuo em APIs e aplicações web","Security Champions — devs como multiplicadores","Compliance ISO 27001 e PCI-DSS acelerado"]},
       mercado:{competidores_provedor:["Veracode","Checkmarx","Snyk","SonarQube","Fluid Attacks","GitHub Advanced Security"]},
-      dores:{principais:["Vulnerabilidades críticas descobertas apenas em producao , custo 6x maior de remediação","Time de seguranca sobrecarregado, sem escala para acompanhar deploys","Clientes enterprise exigindo ISO 27001 ou SOC 2 para fechar contratos","PCI-DSS v4.0 exige SAST e DAST formais em aplicações de pagamento","Open source sem controle , dependencias com CVEs críticos em producao"],exposicao_regulatoria:["PCI-DSS v4.0","BACEN Res. 4.658","ISO 27001","LGPD","OWASP Top 10"],sinais_ativos:["Verificar vagas de AppSec Engineer e DevSecOps no LinkedIn","Checar certificação ISO 27001 publica , ausencia e oportunidade","Buscar CVEs públicos associados a produtos da empresa no NVD","Monitorar bug bounty programs ativos"]},
+      dores:{principais:["Vulnerabilidades críticas descobertas apenas em producao — custo 6x maior de remediação","Time de seguranca sobrecarregado, sem escala para acompanhar deploys","Clientes enterprise exigindo ISO 27001 ou SOC 2 para fechar contratos","PCI-DSS v4.0 exige SAST e DAST formais em aplicações de pagamento","Open source sem controle — dependencias com CVEs críticos em producao"],exposicao_regulatoria:["PCI-DSS v4.0","BACEN Res. 4.658","ISO 27001","LGPD","OWASP Top 10"],sinais_ativos:["Verificar vagas de AppSec Engineer e DevSecOps no LinkedIn","Checar certificação ISO 27001 publica — ausencia e oportunidade","Buscar CVEs públicos associados a produtos da empresa no NVD","Monitorar bug bounty programs ativos"]},
       triggers:["Processo de certificação ISO 27001 ou SOC 2 em andamento","Crescimento acelerado do time de engenharia","Incidente de seguranca recente ou vazamento de dados","Cliente enterprise bloqueando contrato por falta de AppSec","Lancamento de novo produto digital ou API publica"],
       stakeholders:[
-        {cargo:"CISO / Head de Seguranca da Informacao",angulo:"Decisor estrategico. Define budget e estrategia de AppSec. Sente pressao de clientes, reguladores e board. Quer reduzir risco sem frear o produto.",prioridade:"PRIMARIO",urgencia:"Alta"},
+        {cargo:"CISO / Head de Seguranca da Informação",angulo:"Decisor estrategico. Define budget e estrategia de AppSec. Sente pressao de clientes, reguladores e board. Quer reduzir risco sem frear o produto.",prioridade:"PRIMARIO",urgencia:"Alta"},
         {cargo:"CTO / VP de Engenharia",angulo:"Co-decisor tecnico e economico. Controla o roadmap e quer seguranca integrada ao pipeline sem travar entregas.",prioridade:"PRIMARIO",urgencia:"Alta"},
         {cargo:"Engineering Manager / Head de Engenharia",angulo:"Usuario direto e influenciador forte. Avalia friccao da integração e qualidade dos resultados no pipeline.",prioridade:"SECUNDARIO",urgencia:"Media"},
         {cargo:"CPO / Head de Produto",angulo:"Aliado estrategico. Quer AppSec como diferencial para fechar deals enterprise.",prioridade:"SECUNDARIO",urgencia:"Media"},
         {cargo:"Head de Compliance / Juridico",angulo:"Entra em deals com exigencia regulatoria. Valida aderencia da solução ao framework regulatorio.",prioridade:"TERCIARIO",urgencia:"Baixa"},
-        {cargo:"CFO / Diretor Financeiro",angulo:"Aprovacao de budget. Quer ROI claro , custo de vuln em producao 6x maior vs investimento na Conviso.",prioridade:"TERCIARIO",urgencia:"Baixa"},
+        {cargo:"CFO / Diretor Financeiro",angulo:"Aprovacao de budget. Quer ROI claro — custo de vuln em producao 6x maior vs investimento na Conviso.",prioridade:"TERCIARIO",urgencia:"Baixa"},
       ],
       noticias: noticias,
       estrategia:{
         tier:tier,
         emails:[
-          {assunto:company+" + Conviso , seguranca de aplicações",corpo:"Ola,\n\nChego ate voce porque "+company+" tem o perfil exato de empresa onde a Conviso Application Security gera mais impacto , time de engenharia ativo em "+setor+", com pressao crescente por AppSec formal.\n\nUma realidade comum em empresas similares:\n, Vulnerabilidades críticas descobertas apenas em producao , custo 6x maior\n, Time de seguranca sem escala para acompanhar o ritmo de deploys\n, Clientes enterprise bloqueando contratos por falta de AppSec formal\n\nA Conviso Platform integra SAST, DAST, SCA e gestão de vulnerabilidades no pipeline , com integração nativa ao GitHub, GitLab e Azure DevOps.\n\nConsigo te mostrar em 20 minutos como funciona.\n\nTem disponibilidade essa semana?\n\nAbraço,\nAndrei Heimann\nAccount Executive | Conviso Application Security\n(51) 99436-7667"},
-          {assunto:company+": quanto custa uma vulnerabilidade em producao?",corpo:"Ola,\n\nDireto ao ponto: o custo medio de remediação de uma vulnerabilidade descoberta em producao e 6x maior do que se detectada durante o desenvolvimento.\n\nEmpresas de "+setor+" reduziram esse custo em mais de 70% ao integrar SAST e DAST no pipeline , sem frear a velocidade de entrega.\n\nA "+company+" tem o perfil certo para esse resultado. Valeria 20 minutos?\n\nAbraço,\nAndrei Heimann | Conviso Application Security"},
-          {assunto:"Case: ISO 27001 em 60% menos tempo , empresa similar a "+company,corpo:"Ola,\n\nRecentemente ajudamos uma empresa de "+setor+" a:\n\n, Integrar SAST no pipeline CI/CD em menos de 2 semanas\n, Zerar vulnerabilidades críticas em producao nos primeiros 90 dias\n, Reduzir em 60% o tempo para certificação ISO 27001\n, Criar um programa Security Champions escalavel\n\nO time de engenharia não precisou parar o roadmap , o nosso CS conduziu tudo.\n\nFaz sentido eu te contar como funcionou? 20 minutos essa semana.\n\nAbraço,\nAndrei Heimann\nAccount Executive | Conviso Application Security\n(51) 99436-7667"},
+          {assunto:company+" + Conviso — seguranca de aplicações",corpo:"Ola,\n\nChego ate voce porque "+company+" tem o perfil exato de empresa onde a Conviso Application Security gera mais impacto — time de engenharia ativo em "+setor+", com pressao crescente por AppSec formal.\n\nUma realidade comum em empresas similares:\n, Vulnerabilidades críticas descobertas apenas em producao — custo 6x maior\n, Time de seguranca sem escala para acompanhar o ritmo de deploys\n, Clientes enterprise bloqueando contratos por falta de AppSec formal\n\nA Conviso Platform integra SAST, DAST, SCA e gestão de vulnerabilidades no pipeline — com integração nativa ao GitHub, GitLab e Azure DevOps.\n\nConsigo te mostrar em 20 minutos como funciona.\n\nTem disponibilidade essa semana?\n\nAbraço,\nAndrei Heimann\nAccount Executive | Conviso Application Security\n(51) 99436-7667"},
+          {assunto:company+": quanto custa uma vulnerabilidade em producao?",corpo:"Ola,\n\nDireto ao ponto: o custo medio de remediação de uma vulnerabilidade descoberta em producao e 6x maior do que se detectada durante o desenvolvimento.\n\nEmpresas de "+setor+" reduziram esse custo em mais de 70% ao integrar SAST e DAST no pipeline — sem frear a velocidade de entrega.\n\nA "+company+" tem o perfil certo para esse resultado. Valeria 20 minutos?\n\nAbraço,\nAndrei Heimann | Conviso Application Security"},
+          {assunto:"Case: ISO 27001 em 60% menos tempo — empresa similar a "+company,corpo:"Ola,\n\nRecentemente ajudamos uma empresa de "+setor+" a:\n\n, Integrar SAST no pipeline CI/CD em menos de 2 semanas\n, Zerar vulnerabilidades críticas em producao nos primeiros 90 dias\n, Reduzir em 60% o tempo para certificação ISO 27001\n, Criar um programa Security Champions escalavel\n\nO time de engenharia não precisou parar o roadmap — o nosso CS conduziu tudo.\n\nFaz sentido eu te contar como funcionou? 20 minutos essa semana.\n\nAbraço,\nAndrei Heimann\nAccount Executive | Conviso Application Security\n(51) 99436-7667"},
         ],
         inmails:[
-          {assunto:company+" + Conviso , vale 20 minutos?",corpo:"Ola, tudo bem?\n\nVi que "+company+" tem um time de engenharia ativo em "+setor+", exatamente o perfil onde a Conviso entrega mais resultado.\n\nEmpresa similar reduziu vulnerabilidades críticas em 70% e acelerou ISO 27001 em 60% apos integrar a Conviso Platform no pipeline.\n\nFaz sentido um papo de 20 minutos para eu entender como esta o processo de AppSec de voces hoje?\n\nAbraço,\nAndrei Heimann | AE Enterprise , Conviso Application Security"},
-          {assunto:"Uma pergunta sobre seguranca no ciclo de desenvolvimento",corpo:"Ola!\n\nPergunta direta: como voces identificam vulnerabilidades no codigo hoje , e automatizado no pipeline, manual, ou atraves de pentests pontuais?\n\nDependendo da resposta, posso te mostrar como empresas similares resolveram isso de forma estruturada com a Conviso Platform.\n\nVale um papo rápido?"},
-          {assunto:"Vi que "+company+" esta crescendo , parabens",corpo:"Ola,\n\nAcompanho o crescimento da "+company+" no setor de "+setor+".\n\nEmpresa que cresce rápido em produto digital normalmente enfrenta um desafio específico: a velocidade de desenvolvimento cresce mais rápido que a maturidade de seguranca , e o risco cresce junto.\n\nValeria 15 minutos para mostrar como outras empresas do mesmo segmento anteciparam esse problema?\n\nAbraço,\nAndrei Heimann | Conviso Application Security"},
+          {assunto:company+" + Conviso — vale 20 minutos?",corpo:"Ola, tudo bem?\n\nVi que "+company+" tem um time de engenharia ativo em "+setor+", exatamente o perfil onde a Conviso entrega mais resultado.\n\nEmpresa similar reduziu vulnerabilidades críticas em 70% e acelerou ISO 27001 em 60% apos integrar a Conviso Platform no pipeline.\n\nFaz sentido um papo de 20 minutos para eu entender como esta o processo de AppSec de voces hoje?\n\nAbraço,\nAndrei Heimann | AE Enterprise — Conviso Application Security"},
+          {assunto:"Uma pergunta sobre seguranca no ciclo de desenvolvimento",corpo:"Ola!\n\nPergunta direta: como voces identificam vulnerabilidades no codigo hoje — e automatizado no pipeline, manual, ou atraves de pentests pontuais?\n\nDependendo da resposta, posso te mostrar como empresas similares resolveram isso de forma estruturada com a Conviso Platform.\n\nVale um papo rápido?"},
+          {assunto:"Vi que "+company+" esta crescendo — parabens",corpo:"Ola,\n\nAcompanho o crescimento da "+company+" no setor de "+setor+".\n\nEmpresa que cresce rápido em produto digital normalmente enfrenta um desafio específico: a velocidade de desenvolvimento cresce mais rápido que a maturidade de seguranca — e o risco cresce junto.\n\nValeria 15 minutos para mostrar como outras empresas do mesmo segmento anteciparam esse problema?\n\nAbraço,\nAndrei Heimann | Conviso Application Security"},
         ],
         whatsapps:[
           "Oi [Nome], tudo bem? Sou o Andrei da Conviso Application Security. Vi que "+company+" tem um time de engenharia ativo em "+setor+". Trabalhamos com AppSec integrada ao pipeline de desenvolvimento. Valeria 15 minutos essa semana?",
           "Oi [Nome]! Andrei, da Conviso AppSec. Direto ao ponto: empresa do mesmo setor da "+company+" reduziu 70% das vulnerabilidades críticas e acelerou ISO 27001 em 60% com nossa plataforma. Tenho um case rápido. Posso te mandar?",
-          "Oi [Nome], Andrei da Conviso Application Security. Voce cuida de seguranca de aplicações ou engenharia na "+company+"? Se sim, tenho algo relevante , 15 minutos essa semana. Se não for voce, quem seria o contato certo?",
+          "Oi [Nome], Andrei da Conviso Application Security. Voce cuida de seguranca de aplicações ou engenharia na "+company+"? Se sim, tenho algo relevante — 15 minutos essa semana. Se não for voce, quem seria o contato certo?",
         ],
         cold_calls:[
-          "Bom dia [Nome], aqui e o Andrei da Conviso Application Security. Tenho 30 segundos? [PAUSA] Perfeito. Trabalho com seguranca de aplicações integrada ao ciclo de desenvolvimento , e a "+company+" tem exatamente o perfil onde a gente gera mais resultado em "+setor+". Empresas similares reduziram vulnerabilidades críticas em 70% sem frear o time de produto. Faz sentido eu te mostrar como funcionou? Quando voce tem 20 minutos?",
-          "[Nome], bom dia! Andrei da Conviso AppSec. Ligo porque a "+company+" apareceu no nosso radar. Uma pergunta: hoje voces tem algum processo automatizado de seguranca no pipeline , SAST, DAST, analise de dependencias? [ouvir] Entendi. E quando descobrem uma vulnerabilidade crítica, qual e o processo de priorização e correção hoje?",
-          "Oi [Nome], Andrei da Conviso AppSec. Vou ser rápido. Tenho um case de empresa de "+setor+" com perfil muito similar ao da "+company+" , reduziram 70% das vulns em producao e aceleraram a ISO 27001 em 60%. Vale 2 minutos agora ou prefere que eu ligue amanha?",
+          "Bom dia [Nome], aqui e o Andrei da Conviso Application Security. Tenho 30 segundos? [PAUSA] Perfeito. Trabalho com seguranca de aplicações integrada ao ciclo de desenvolvimento — e a "+company+" tem exatamente o perfil onde a gente gera mais resultado em "+setor+". Empresas similares reduziram vulnerabilidades críticas em 70% sem frear o time de produto. Faz sentido eu te mostrar como funcionou? Quando voce tem 20 minutos?",
+          "[Nome], bom dia! Andrei da Conviso AppSec. Ligo porque a "+company+" apareceu no nosso radar. Uma pergunta: hoje voces tem algum processo automatizado de seguranca no pipeline — SAST, DAST, analise de dependencias? [ouvir] Entendi. E quando descobrem uma vulnerabilidade crítica, qual e o processo de priorização e correção hoje?",
+          "Oi [Nome], Andrei da Conviso AppSec. Vou ser rápido. Tenho um case de empresa de "+setor+" com perfil muito similar ao da "+company+" — reduziram 70% das vulns em producao e aceleraram a ISO 27001 em 60%. Vale 2 minutos agora ou prefere que eu ligue amanha?",
         ],
         perguntas_spin:[
-          "SITUAÇÃO: Como esta estruturado hoje o processo de seguranca de aplicações , e manual, automatizado no pipeline, ou ainda não tem processo formal?",
+          "SITUAÇÃO: Como esta estruturado hoje o processo de seguranca de aplicações — e manual, automatizado no pipeline, ou ainda não tem processo formal?",
           "SITUAÇÃO: Qual o tamanho do time de engenharia e quantos deploys por semana fazem hoje?",
           "SITUAÇÃO: Voces usam alguma ferramenta de SAST, SCA ou analise de dependencias integrada ao pipeline hoje?",
           "SITUAÇÃO: Existe um time ou profissional dedicado de seguranca de aplicações?",
@@ -988,24 +1007,24 @@ function SearchView(props) {
           "IMPLICAÇÃO: Voces estao em processo de certificação ISO 27001, SOC 2 ou PCI-DSS? Qual o impacto de não ter AppSec formalizada?",
           "IMPLICAÇÃO: Se ocorrer um incidente de seguranca em producao, qual seria o impacto financeiro, reputacional e contratual?",
           "NECESSIDADE: Se tivessem SAST, DAST e gestão de vulnerabilidades integrados no pipeline hoje, qual seria o impacto?",
-          "NECESSIDADE: O que precisaria acontecer para AppSec subir de prioridade na agenda , ou ja esta prioritaria?",
+          "NECESSIDADE: O que precisaria acontecer para AppSec subir de prioridade na agenda — ou ja esta prioritaria?",
           "NECESSIDADE: Se eu conseguisse te mostrar como integrar seguranca no pipeline em 2 semanas sem impactar o roadmap, isso seria suficiente para uma POC?",
         ],
         objecoes:[
           {objecao:"Ja usamos SonarQube / ferramenta interna",resposta:"SonarQube e otimo para qualidade de codigo. A diferenca com a Conviso Platform e a camada de gestão de vulnerabilidades com contexto de risco de negocio, DAST para aplicações em execucao, SCA para open source e o programa Security Champions. Posso mostrar como as duas se complementam em 20 minutos?"},
           {objecao:"Não temos budget para isso agora",resposta:"Entendo. Antes de fecharmos: qual o custo estimado de remediação de uma vuln crítica em producao, considerando horas de engenharia, rollback e risco regulatorio? Na maioria dos cases, o investimento na Conviso paga em um único incidente evitado."},
-          {objecao:"Nossa TI não tem capacidade de implementacao agora",resposta:"A integração com GitHub, GitLab ou Azure DevOps leva em media 2 semanas e e conduzida pelo nosso time de CS , o time de voces não precisa parar o roadmap."},
+          {objecao:"Nossa TI não tem capacidade de implementacao agora",resposta:"A integração com GitHub, GitLab ou Azure DevOps leva em media 2 semanas e e conduzida pelo nosso time de CS — o time de voces não precisa parar o roadmap."},
           {objecao:"Não e prioridade agora, temos outros projetos",resposta:"Faz sentido. Voces tem algum cliente enterprise ou processo de certificação onde AppSec sera exigida nos próximos 6 meses? Normalmente esse tema sobe de prioridade antes do esperado."},
-          {objecao:"Ja fazemos pentest periodicamente",resposta:"Pentest pontual e um otimo comeco. A diferenca: com deploys frequentes, vulnerabilidades novas surgem entre um pentest e outro. A Conviso complementa com analise continua no pipeline."},
-          {objecao:"Precisamos envolver o time de engenharia antes",resposta:"Perfeito , e o caminho certo. Posso preparar uma demo tecnica com o Engineering Manager mostrando a integração no pipeline real de voces. Quem seria o ponto de contato tecnico?"},
-          {objecao:"Ja tentamos uma ferramenta de AppSec e o time não adotou",resposta:"O que não funcionou , friccao na integração, muitos falsos positivos, ou o time não sabia priorizar os resultados? A Conviso tem um modelo de Security Champions específico para resolver esse problema de adocao."},
-          {objecao:"Preferimos fazer internamente",resposta:"Faz sentido. A Conviso não substitui o time interno , ela da a plataforma e os dados para o time trabalhar com mais eficiencia. Qual e a cobertura atual em aplicações monitoradas vs total do portfolio?"},
+          {objecao:"Ja fazemos pentest periodicamente",resposta:"Pentest pontual e um otimo começo. A diferenca: com deploys frequentes, vulnerabilidades novas surgem entre um pentest e outro. A Conviso complementa com analise continua no pipeline."},
+          {objecao:"Precisamos envolver o time de engenharia antes",resposta:"Perfeito — e o caminho certo. Posso preparar uma demo tecnica com o Engineering Manager mostrando a integração no pipeline real de voces. Quem seria o ponto de contato tecnico?"},
+          {objecao:"Ja tentamos uma ferramenta de AppSec e o time não adotou",resposta:"O que não funcionou — friccao na integração, muitos falsos positivos, ou o time não sabia priorizar os resultados? A Conviso tem um modelo de Security Champions específico para resolver esse problema de adocao."},
+          {objecao:"Preferimos fazer internamente",resposta:"Faz sentido. A Conviso não substitui o time interno — ela da a plataforma e os dados para o time trabalhar com mais eficiencia. Qual e a cobertura atual em aplicações monitoradas vs total do portfolio?"},
         ]
       },
       proximos_passos:{
-        ae:["Mapear organograma no LinkedIn Sales Navigator , foco em CISO, CTO e Head de Engenharia da "+company,"Pesquisar vagas abertas de AppSec Engineer, Security Engineer e DevSecOps , sinal de dor ativa","Verificar certificação ISO 27001 publica da "+company+" , ausencia e oportunidade direta","Buscar CVEs públicos associados a produtos da "+company+" no NVD ou GitHub Security Advisories","Preparar business case com custo de remediação de vuln em producao vs investimento na Conviso","Enviar InMail personalizado ao CISO ou CTO referenciando o contexto regulatorio do setor de "+setor],
-        bdr:["Cold call focado em CISO e CTO , não confundir com outros perfis de seguranca","Enviar WhatsApp com Loom personalizado referenciando o case mais relevante do segmento","Disparar sequência de 4 emails (Custo de Vuln, Case, ISO 27001, FUP Final)","Monitorar sinais via 6Sense , alertar AE sobre contas com intencao ativa","Mapear eventos do setor: Mind The Sec, Security Leaders, CIAB, eventos de tecnologia"],
-        prazo:"Primeira abordagem em ate 48 horas , prioridade Tier 1 se ha sinal de certificação, incidente ou cliente enterprise exigindo AppSec"
+        ae:["Mapear organograma no LinkedIn Sales Navigator — foco em CISO, CTO e Head de Engenharia da "+company,"Pesquisar vagas abertas de AppSec Engineer, Security Engineer e DevSecOps — sinal de dor ativa","Verificar certificação ISO 27001 publica da "+company+" — ausencia e oportunidade direta","Buscar CVEs públicos associados a produtos da "+company+" no NVD ou GitHub Security Advisories","Preparar business case com custo de remediação de vuln em producao vs investimento na Conviso","Enviar InMail personalizado ao CISO ou CTO referenciando o contexto regulatorio do setor de "+setor],
+        bdr:["Cold call focado em CISO e CTO — não confundir com outros perfis de seguranca","Enviar WhatsApp com Loom personalizado referenciando o case mais relevante do segmento","Disparar sequência de 4 emails (Custo de Vuln, Case, ISO 27001, FUP Final)","Monitorar sinais via 6Sense — alertar AE sobre contas com intencao ativa","Mapear eventos do setor: Mind The Sec, Security Leaders, CIAB, eventos de tecnologia"],
+        prazo:"Primeira abordagem em ate 48 horas — prioridade Tier 1 se ha sinal de certificação, incidente ou cliente enterprise exigindo AppSec"
       }
     };
   }
@@ -1023,9 +1042,23 @@ function SearchView(props) {
     .then(function(resp){
       var data = buildData(nome, resp.results);
       props.onSave(nome, data, true);
-      // Enrich stakeholders in background
+      // Enrich stakeholders and merge into saved account
       fetch("/api/stakeholders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({company:nome,domain:domain})})
-        .then(function(r){return r.json();}).catch(function(){});
+        .then(function(r){return r.ok?r.json():null;})
+        .then(function(stakhData){
+          if(!stakhData||!stakhData.contacts||!stakhData.contacts.length) return;
+          // Merge enriched contacts into the stakeholders array
+          storageList("acc:").then(function(keys){
+            keys.forEach(function(k){
+              storageGet(k).then(function(acc){
+                if(!acc||acc.nome!==nome) return;
+                var merged = mergeStakeholders(acc.data&&acc.data.stakeholders||[], stakhData.contacts);
+                var updated = Object.assign({},acc,{data:Object.assign({},acc.data,{stakeholders:merged}),enriched:stakhData});
+                storageSet(k,updated);
+              });
+            });
+          });
+        }).catch(function(){});
       setLoading(false); setDone(nome); setInputVal("");
     })
     .catch(function(e){
@@ -1117,7 +1150,7 @@ function AccountsView(props) {
           <div style={{fontSize:13,color:"#64748b"}}>{accounts.length+" empresa"+(accounts.length!==1?"s":"")+" mapeada"+(accounts.length!==1?"s":"")}</div>
         </div>
       </div>
-      <div style={{display:"flex",gap:10,marginBottom:24,overflowX:"auto",paddingBottom:4}}>
+      <div className="status-chips" style={{display:"flex",gap:10,marginBottom:24,overflowX:"auto",paddingBottom:4}}>
         {STATUS_ORDER.map(function(s){
           var sc=STATUS_CONFIG[s]; var cnt=statCounts[s];
           return <div key={s} onClick={function(){setFilter(function(f){return Object.assign({},f,{status:f.status===s?"":s});});}} style={{flexShrink:0,background:filter.status===s?sc.bg:"#fff",border:"1.5px solid "+(filter.status===s?sc.border:"#e8edf4"),borderRadius:14,padding:"12px 16px",cursor:"pointer",transition:"all .2s cubic-bezier(.22,1,.36,1)",textAlign:"center",minWidth:100,boxShadow:filter.status===s?"0 4px 16px rgba(15,23,42,.1)":"0 1px 4px rgba(15,23,42,.04)"}}>
@@ -1143,7 +1176,7 @@ function AccountsView(props) {
           <div style={{fontSize:12,color:"#94a3b8"}}>{accounts.length===0?"Vá para Busca e analise sua primeira empresa":"Tente limpar os filtros"}</div>
         </div>
       ) : (
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:16}}>
+        <div className="card-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:16}}>
           {filtered.map(function(acc){return <AccountCard key={acc.id} acc={acc} onOpen={props.onOpen} onStatusChange={props.onStatusChange} onDelete={props.onDelete}/>;}) }
         </div>
       )}
@@ -1153,6 +1186,53 @@ function AccountsView(props) {
 
 
 // ── INSIGHTS VIEW ─────────────────────────────────────────────────────────────
+
+// Merge API-enriched contacts into stakeholder profiles
+function mergeStakeholders(stakeholders, contacts) {
+  var keywords = {
+    "CISO":["ciso","chief information security","head of security","segurança da informação","information security"],
+    "CTO":["cto","chief technology","vp engineering","vp de engenharia","head of engineering","diretor de tecnologia"],
+    "Engineering Manager":["engineering manager","head of engineering","tech lead","líder técnico"],
+    "CPO":["cpo","chief product","head of product","head de produto","vp product"],
+    "CFO":["cfo","chief financial","diretor financeiro","vp finance"],
+    "Compliance":["compliance","jurídico","legal","regulat"],
+  };
+  return stakeholders.map(function(s) {
+    if (s.linkedin || s.email) return s; // already enriched
+    var cargo = (s.cargo||"").toLowerCase();
+    var matched = null;
+    Object.keys(keywords).forEach(function(k) {
+      if (matched) return;
+      keywords[k].forEach(function(kw) {
+        if (!matched && cargo.includes(k.toLowerCase())) {
+          // find contact whose title matches
+          contacts.forEach(function(c) {
+            if (!matched && c.cargo && c.cargo.toLowerCase().includes(kw)) matched = c;
+          });
+        }
+      });
+    });
+    if (!matched) {
+      // Try broader match
+      contacts.forEach(function(c) {
+        if (matched) return;
+        var ct = (c.cargo||"").toLowerCase();
+        if (cargo.split(" ").some(function(w){return w.length>4&&ct.includes(w);})) matched = c;
+      });
+    }
+    if (matched) {
+      return Object.assign({},s,{
+        nome: matched.nome||s.nome||"",
+        email: matched.email||s.email||"",
+        linkedin: matched.linkedin||s.linkedin||"",
+        phone: matched.phone||s.phone||"",
+        source: matched.source||"",
+      });
+    }
+    return s;
+  });
+}
+
 function SemiCircleChart(props) {
   var convSteps = props.convSteps||[];
   var colors=["#0f172a","#0369a1","#7c3aed","#065f46","#991b1b"];
@@ -1280,7 +1360,7 @@ function InsightsView(props) {
     return (
       <div>
         <div style={{fontSize:26,fontWeight:800,color:"#0f172a",marginBottom:6,letterSpacing:"-0.5px"}}>Insights</div>
-        <div style={{fontSize:13,color:"#64748b",marginBottom:32}}>Dashboard de performance da sua prospecao.</div>
+        <div style={{fontSize:13,color:"#64748b",marginBottom:32}}>Dashboard de performance da sua prospecção.</div>
         <div style={{textAlign:"center",padding:"64px 0",background:"#f8fafc",borderRadius:20,border:"1.5px dashed #e2e8f0"}}>
           <div style={{fontSize:36,marginBottom:12}}>📊</div>
           <div style={{fontSize:15,fontWeight:700,color:"#334155",marginBottom:6}}>Nenhum dado ainda</div>
@@ -1299,7 +1379,7 @@ function InsightsView(props) {
         </div>
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:14,marginBottom:24}}>
+      <div className="kpi-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:14,marginBottom:24}}>
         {kpis.map(function(k) {
           return (
             <div key={k.label} style={{background:"#fff",border:"1px solid #e8edf4",borderRadius:18,padding:"20px 22px",boxShadow:"0 4px 20px rgba(15,23,42,.06)",position:"relative",overflow:"hidden"}}>
@@ -1311,7 +1391,7 @@ function InsightsView(props) {
         })}
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18,marginBottom:18}}>
+      <div className="chart-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18,marginBottom:18}}>
 
         <div style={{background:"rgba(255,255,255,.95)",border:"1px solid rgba(228,235,244,.8)",borderRadius:20,padding:"22px 24px",boxShadow:"0 4px 24px rgba(15,23,42,.07)"}}>
           <div style={{fontSize:10,fontWeight:700,color:"#10b981",letterSpacing:2,textTransform:"uppercase",marginBottom:20,display:"flex",alignItems:"center",gap:6}}>
@@ -1582,6 +1662,21 @@ export default function App() {
     "::-webkit-scrollbar{width:5px;height:5px}",
     "::-webkit-scrollbar-track{background:#f1f5f9}",
     "::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}",
+    "@media(max-width:768px){",
+    ".app-layout{flex-direction:column!important}",
+    ".sidebar-wrapper{width:100%!important;height:56px!important;flex-direction:row!important;overflow:hidden!important;position:sticky!important;top:0!important;z-index:100!important;box-shadow:0 2px 12px rgba(15,23,42,.1)!important}",
+    ".main-content{padding:16px!important}",
+    ".g2{grid-template-columns:1fr!important}",
+    ".modal-grid{grid-template-columns:1fr!important}",
+    ".kpi-grid{grid-template-columns:1fr 1fr!important}",
+    ".chart-grid{grid-template-columns:1fr!important}",
+    ".card-grid{grid-template-columns:1fr!important}",
+    ".pipeline-scroll{overflow-x:auto!important}",
+    ".modal-box{max-width:98vw!important;margin:8px!important;border-radius:16px!important}",
+    ".modal-tabs{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}",
+    ".modal-tabs button{font-size:10px!important;padding:8px 10px!important}",
+    ".status-chips{overflow-x:auto!important}",
+    "}",
     "@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}",
     "@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}50%{box-shadow:0 0 0 6px rgba(16,185,129,.1)}}",
     "@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}",
@@ -1610,10 +1705,10 @@ export default function App() {
   ];
 
   return (
-    <div style={{display:"flex",height:"100vh",background:"#f8fafc",overflow:"hidden"}}>
+    <div className="app-layout" style={{display:"flex",height:"100vh",background:"#f8fafc",overflow:"hidden"}}>
       <style>{css}</style>
 
-      <div className="sidebar" style={{width:sidebarOpen?224:64,background:"#fff",borderRight:"1px solid #e8edf4",display:"flex",flexDirection:"column",flexShrink:0,boxShadow:"4px 0 24px rgba(15,23,42,.06)",position:"relative",overflow:"hidden"}}>
+      <div className="sidebar sidebar-wrapper" style={{width:sidebarOpen?224:64,background:"#fff",borderRight:"1px solid #e8edf4",display:"flex",flexDirection:"column",flexShrink:0,boxShadow:"4px 0 24px rgba(15,23,42,.06)",position:"relative",overflow:"hidden"}}>
         <div style={{height:3,background:"linear-gradient(90deg,#10b981,#0ea5e9,#8b5cf6)",flexShrink:0}}/>
 
         {sidebarOpen ? (
@@ -1687,7 +1782,7 @@ export default function App() {
       </div>
 
       <div style={{flex:1,overflow:"hidden",display:"flex",flexDirection:"column"}}>
-        <div style={{flex:1,overflowY:"auto",padding:"36px 40px"}}>
+        <div className="main-content" style={{flex:1,overflowY:"auto",padding:"36px 40px"}}>
           {loading ? (
             <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100%",gap:12}}>
               <div style={{width:8,height:8,borderRadius:"50%",background:"#10b981"}}/>
