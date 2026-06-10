@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-// ── STORAGE — localStorage (persists across reloads) ─────────────────────────
+// -- STORAGE , localStorage (persists across reloads) -------------------------
 var STORAGE_PREFIX = "bdrhelper_";
 async function storageGet(key) {
   try {
@@ -33,7 +33,7 @@ async function storageDel(key) {
   } catch(e) { return false; }
 }
 
-// ── CONSTANTS ────────────────────────────────────────────────────────────────
+// -- CONSTANTS ----------------------------------------------------------------
 var STATUS_CONFIG = {
   "prospecting": { label:"Em prospecção", color:"#64748b", bg:"#f8fafc", border:"#e2e8f0" },
   "contacted":   { label:"Contatado",     color:"#0369a1", bg:"#eff6ff", border:"#bfdbfe" },
@@ -130,7 +130,7 @@ function applyVars(text, acc) {
     .replace(/\{setor\}/g, (acc.data && acc.data.empresa && acc.data.empresa.setor) || acc.setor || "tecnologia");
 }
 
-// ── MINI GAUGE ────────────────────────────────────────────────────────────────
+// -- MINI GAUGE ----------------------------------------------------------------
 function MiniGauge(props) {
   var fc = FIT_CONFIG[props.score] || FIT_CONFIG.ALTO;
   var pct = props.score === "ALTO" ? 88 : props.score === "MEDIO" ? 55 : 22;
@@ -144,7 +144,7 @@ function MiniGauge(props) {
   );
 }
 
-// ── COPY BUTTON ───────────────────────────────────────────────────────────────
+// -- COPY BUTTON ---------------------------------------------------------------
 function CopyBtn(props) {
   var [done, setDone] = useState(false);
   function handle() {
@@ -159,11 +159,14 @@ function CopyBtn(props) {
   );
 }
 
-// ── SEQUENCE VIEW ─────────────────────────────────────────────────────────────
+// -- SEQUENCE VIEW -------------------------------------------------------------
 function SequenceView(props) {
   var accounts = props.accounts;
   var [selAcc, setSelAcc] = useState(null);
   var [selProfile, setSelProfile] = useState(null);
+  var [customProfile, setCustomProfile] = useState(null);
+  var [customLabel, setCustomLabel] = useState("");
+  var [customAngle, setCustomAngle] = useState("");
   var [generated, setGenerated] = useState(null);
   var [saved, setSaved] = useState([]);
   var [view, setView] = useState("builder"); // builder | library
@@ -204,7 +207,7 @@ function SequenceView(props) {
       <div>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:28,flexWrap:"wrap",gap:12}}>
           <div>
-            <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>Sequências Salvas</div>
+            <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>{"Sequências Salvas"}</div>
             <div style={{fontSize:13,color:"#64748b"}}>{saved.length + " sequência" + (saved.length !== 1 ? "s" : "") + " na biblioteca"}</div>
           </div>
           <button onClick={function(){setView("builder");}} style={{background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",border:"none",borderRadius:12,padding:"11px 22px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>
@@ -214,7 +217,7 @@ function SequenceView(props) {
 
         {saved.length === 0 ? (
           <div style={{textAlign:"center",padding:"64px 0",background:"#f8fafc",borderRadius:20,border:"1.5px dashed #e2e8f0"}}>
-            <div style={{fontSize:36,marginBottom:12}}>📬</div>
+            <div style={{fontSize:36,marginBottom:12}}>{"📬"}</div>
             <div style={{fontSize:15,fontWeight:700,color:"#334155",marginBottom:6}}>Nenhuma sequencia salva ainda</div>
             <div style={{fontSize:12,color:"#94a3b8"}}>Gere uma sequencia e clique em Salvar na Biblioteca</div>
           </div>
@@ -261,7 +264,7 @@ function SequenceView(props) {
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:28,flexWrap:"wrap",gap:12}}>
         <div>
-          <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>Gerador de Sequências</div>
+          <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>{"Gerador de Sequências"}</div>
           <div style={{fontSize:13,color:"#64748b"}}>Selecione a conta e o perfil do stakeholder para gerar uma cadencia personalizada de 6 toques.</div>
         </div>
         <button onClick={function(){setView("library");}} style={{background:"#f8fafc",color:"#475569",border:"1.5px solid #e2e8f0",borderRadius:12,padding:"11px 22px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:6}}>
@@ -309,16 +312,37 @@ function SequenceView(props) {
             {profileOpts.map(function(p) {
               var active = selProfile && selProfile.id === p.id;
               return (
-                <div key={p.id} onClick={function(){setSelProfile(p);setGenerated(null);}}
+                <div key={p.id} onClick={function(){setCustomProfile(null);setSelProfile(p);setGenerated(null);}}
                   style={{background:active?"#f0fdf4":"#fff",border:"1.5px solid " + (active?"#10b981":"#e8edf4"),borderRadius:12,padding:"11px 14px",cursor:"pointer",transition:"all .2s",display:"flex",alignItems:"center",gap:10}}>
                   <div style={{flex:1}}>
                     <div style={{fontSize:12.5,fontWeight:700,color:"#0f172a"}}>{p.label}</div>
-                    <div style={{fontSize:10,color:"#94a3b8",marginTop:2}}>{"Angulo: " + p.angle}</div>
+                    <div style={{fontSize:10,color:"#94a3b8",marginTop:2}}>{"Ângulo: " + p.angle}</div>
                   </div>
                   {active && <div style={{width:8,height:8,borderRadius:"50%",background:"#10b981",flexShrink:0}}/>}
                 </div>
               );
             })}
+            <div style={{border:"1.5px dashed "+(customProfile?"#10b981":"#e2e8f0"),borderRadius:12,padding:"12px 14px",background:customProfile?"#f0fdf4":"#fafafa",transition:"all .2s"}}>
+              <div style={{fontSize:11,fontWeight:600,color:"#64748b",marginBottom:8}}>+ Cargo personalizado</div>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                <input value={customLabel} onChange={function(e){setCustomLabel(e.target.value);}}
+                  placeholder="Ex: Head of DevOps, VP de Produto..."
+                  style={{flex:1,minWidth:140,background:"#fff",border:"1px solid #e2e8f0",borderRadius:8,padding:"7px 10px",fontSize:12,color:"#0f172a",fontFamily:"inherit",outline:"none"}}
+                  onFocus={function(e){e.target.style.borderColor="#10b981";}} onBlur={function(e){e.target.style.borderColor="#e2e8f0";}}/>
+                <input value={customAngle} onChange={function(e){setCustomAngle(e.target.value);}}
+                  placeholder="Ângulo de abordagem..."
+                  style={{flex:1,minWidth:140,background:"#fff",border:"1px solid #e2e8f0",borderRadius:8,padding:"7px 10px",fontSize:12,color:"#0f172a",fontFamily:"inherit",outline:"none"}}
+                  onFocus={function(e){e.target.style.borderColor="#10b981";}} onBlur={function(e){e.target.style.borderColor="#e2e8f0";}}/>
+                <button onClick={function(){
+                  if (!customLabel.trim()) return;
+                  var cp = {id:"custom",label:customLabel.trim(),angle:customAngle.trim()||"abordagem customizada",pain:"dores específicas do cargo"};
+                  setCustomProfile(cp); setSelProfile(cp); setGenerated(null);
+                }} style={{background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",border:"none",borderRadius:8,padding:"7px 14px",fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}}>
+                  Usar este cargo
+                </button>
+              </div>
+              {customProfile && <div style={{marginTop:8,fontSize:10,color:"#059669",fontWeight:600}}>{"✓ Usando: "+customProfile.label}</div>}
+            </div>
           </div>
         </div>
       </div>
@@ -326,7 +350,8 @@ function SequenceView(props) {
       <div style={{display:"flex",gap:12,marginBottom:32}}>
         <button onClick={generate} disabled={!selAcc || !selProfile}
           style={{background: selAcc && selProfile ? "linear-gradient(135deg,#10b981,#059669)" : "#e2e8f0",color: selAcc && selProfile ? "#fff" : "#94a3b8",border:"none",borderRadius:12,padding:"14px 32px",fontSize:13,fontWeight:600,cursor: selAcc && selProfile ? "pointer" : "not-allowed",fontFamily:"inherit",boxShadow: selAcc && selProfile ? "0 4px 14px rgba(16,185,129,.35)" : "none",transition:"all .2s"}}>
-          Gerar Sequência de 6 Toques
+          {"Gerar Sequência de 6 Toques"}
+
         </button>
         {generated && (
           <button onClick={saveSeq} style={{background:"#fff",color:"#059669",border:"1.5px solid rgba(16,185,129,.35)",borderRadius:12,padding:"14px 24px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit",transition:"all .2s"}}
@@ -389,7 +414,7 @@ function SequenceView(props) {
   );
 }
 
-// ── SEQUENCE MODAL ────────────────────────────────────────────────────────────
+// -- SEQUENCE MODAL ------------------------------------------------------------
 function SequenceModal(props) {
   var seq = props.seq;
   return (
@@ -423,7 +448,7 @@ function SequenceModal(props) {
   );
 }
 
-// ── ACCOUNT CARD ──────────────────────────────────────────────────────────────
+// -- ACCOUNT CARD --------------------------------------------------------------
 function AccountCard(props) {
   var acc = props.acc;
   var fc = FIT_CONFIG[acc.fit] || FIT_CONFIG.ALTO;
@@ -480,13 +505,14 @@ function AccountCard(props) {
   );
 }
 
-// ── PIPELINE VIEW ─────────────────────────────────────────────────────────────
+// -- PIPELINE VIEW -------------------------------------------------------------
 function PipelineView(props) {
-  var dragState = useRef({active:false, id:null, fromCol:null});
   var [overCol, setOverCol] = useState(null);
   var [dragId, setDragId] = useState(null);
+  var [dragAcc, setDragAcc] = useState(null);
+  var [ghostPos, setGhostPos] = useState({x:0, y:0});
+  var dragFrom = useRef(null);
   var colRefs = useRef({});
-  var containerRef = useRef(null);
 
   function getColAtPoint(x, y) {
     var found = null;
@@ -499,33 +525,25 @@ function PipelineView(props) {
     return found;
   }
 
-  function startDrag(accId, fromCol) {
-    dragState.current = {active:true, id:accId, fromCol:fromCol};
-    setDragId(accId);
-    setOverCol(fromCol);
-  }
-  function endDrag(x, y) {
-    if (!dragState.current.active) return;
-    var col = getColAtPoint(x, y);
-    if (col && col !== dragState.current.fromCol) {
-      props.onStatusChange(dragState.current.id, col);
-    }
-    dragState.current = {active:false, id:null, fromCol:null};
-    setDragId(null);
-    setOverCol(null);
-  }
-
-  // Mouse events
-  function onMouseDown(e, accId, fromCol) {
+  function startMouseDrag(e, acc, fromCol) {
     e.preventDefault();
-    startDrag(accId, fromCol);
+    dragFrom.current = fromCol;
+    setDragId(acc.id);
+    setDragAcc(acc);
+    setGhostPos({x:e.clientX-80, y:e.clientY-30});
+    setOverCol(fromCol);
     function onMove(ev) {
-      if (!dragState.current.active) return;
+      setGhostPos({x:ev.clientX-80, y:ev.clientY-30});
       var col = getColAtPoint(ev.clientX, ev.clientY);
-      setOverCol(col || dragState.current.fromCol);
+      if (col) setOverCol(col);
     }
     function onUp(ev) {
-      endDrag(ev.clientX, ev.clientY);
+      var col = getColAtPoint(ev.clientX, ev.clientY);
+      if (col && col !== dragFrom.current) props.onStatusChange(acc.id, col);
+      dragFrom.current = null;
+      setDragId(null);
+      setDragAcc(null);
+      setOverCol(null);
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
     }
@@ -533,80 +551,193 @@ function PipelineView(props) {
     window.addEventListener("mouseup", onUp);
   }
 
-  // Touch events
-  function onTouchStart(e, accId, fromCol) {
-    startDrag(accId, fromCol);
+  function startTouchDrag(e, acc, fromCol) {
+    var t0 = e.touches[0];
+    dragFrom.current = fromCol;
+    setDragId(acc.id);
+    setDragAcc(acc);
+    setGhostPos({x:t0.clientX-80, y:t0.clientY-30});
+    setOverCol(fromCol);
     function onMove(ev) {
-      if (!dragState.current.active || !ev.touches[0]) return;
+      ev.preventDefault();
       var t = ev.touches[0];
+      if (!t) return;
+      setGhostPos({x:t.clientX-80, y:t.clientY-30});
       var col = getColAtPoint(t.clientX, t.clientY);
-      setOverCol(col || dragState.current.fromCol);
+      if (col) setOverCol(col);
     }
     function onEnd(ev) {
       var t = ev.changedTouches[0];
-      if (t) endDrag(t.clientX, t.clientY);
-      else { dragState.current={active:false,id:null,fromCol:null}; setDragId(null); setOverCol(null); }
-      e.target.removeEventListener("touchmove", onMove);
-      e.target.removeEventListener("touchend", onEnd);
+      if (t) {
+        var col = getColAtPoint(t.clientX, t.clientY);
+        if (col && col !== dragFrom.current) props.onStatusChange(acc.id, col);
+      }
+      dragFrom.current = null;
+      setDragId(null);
+      setDragAcc(null);
+      setOverCol(null);
+      document.removeEventListener("touchmove", onMove);
+      document.removeEventListener("touchend", onEnd);
     }
-    e.target.addEventListener("touchmove", onMove, {passive:true});
-    e.target.addEventListener("touchend", onEnd);
+    document.addEventListener("touchmove", onMove, {passive:false});
+    document.addEventListener("touchend", onEnd, {once:true});
   }
 
+  var ghostFc = dragAcc ? (FIT_CONFIG[dragAcc.fit]||FIT_CONFIG.ALTO) : null;
+
   return (
-    <div ref={containerRef} className="pipeline-scroll" style={{overflowX:"auto",paddingBottom:16,userSelect:"none"}}>
-      <div style={{display:"flex",gap:14,minWidth:900}}>
-        {STATUS_ORDER.map(function(col) {
-          var sc = STATUS_CONFIG[col];
-          var cards = props.accounts.filter(function(a){return a.status===col;});
-          var isOver = overCol===col && dragState.current.fromCol!==col;
-          return (
-            <div key={col}
-              ref={function(el){colRefs.current[col]=el;}}
-              style={{flex:1,minWidth:155,background:isOver?"rgba(16,185,129,.06)":"#f8fafc",borderRadius:16,padding:14,border:"1.5px solid "+(isOver?"#10b981":"#e8edf4"),transition:"border-color .15s,background .15s",boxShadow:isOver?"0 0 0 3px rgba(16,185,129,.15)":"none"}}>
-              <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:12}}>
-                <div style={{width:8,height:8,borderRadius:"50%",background:sc.color}}/>
-                <div style={{fontSize:9,fontWeight:700,color:sc.color,textTransform:"uppercase",letterSpacing:.8}}>{sc.label}</div>
-                <div style={{marginLeft:"auto",fontSize:10,fontWeight:700,color:"#94a3b8",background:"#e2e8f0",borderRadius:20,padding:"1px 7px"}}>{cards.length}</div>
-              </div>
-              <div style={{display:"flex",flexDirection:"column",gap:8,minHeight:60}}>
-                {cards.map(function(acc) {
-                  var fc = FIT_CONFIG[acc.fit]||FIT_CONFIG.ALTO;
-                  var isDragging = dragId===acc.id;
-                  return (
-                    <div key={acc.id}
-                      onMouseDown={function(e){onMouseDown(e,acc.id,col);}}
-                      onTouchStart={function(e){onTouchStart(e,acc.id,col);}}
-                      onClick={function(){if(!dragId)props.onOpen(acc);}}
-                      style={{background:"#fff",border:"1px solid "+(isDragging?"#10b981":"#edf0f7"),borderRadius:14,padding:"12px 14px",cursor:isDragging?"grabbing":"grab",touchAction:"none",boxShadow:isDragging?"0 8px 24px rgba(16,185,129,.2)":"0 1px 4px rgba(15,23,42,.05)",opacity:isDragging?0.5:1,transform:isDragging?"rotate(2deg) scale(.96)":"none",transition:isDragging?"none":"all .2s",position:"relative"}}>
-                      <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:3}}>
-                        <div style={{fontSize:12,fontWeight:700,color:"#0f172a",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{acc.nome}</div>
-                        <div style={{fontSize:13,color:"#cbd5e1",marginLeft:6,flexShrink:0}}>⠿</div>
+    <div style={{position:"relative"}}>
+      <div className="pipeline-scroll" style={{overflowX:"auto",paddingBottom:16,userSelect:"none"}}>
+        <div style={{display:"flex",gap:14,minWidth:900}}>
+          {STATUS_ORDER.map(function(col) {
+            var sc = STATUS_CONFIG[col];
+            var cards = props.accounts.filter(function(a){return a.status===col;});
+            var isOver = overCol===col && dragFrom.current!==null && dragFrom.current!==col;
+            return (
+              <div key={col}
+                ref={function(el){colRefs.current[col]=el;}}
+                style={{flex:1,minWidth:155,background:isOver?"rgba(16,185,129,.06)":"#f8fafc",borderRadius:16,padding:14,border:"1.5px solid "+(isOver?"#10b981":"#e8edf4"),transition:"border-color .15s,background .15s",boxShadow:isOver?"0 0 0 3px rgba(16,185,129,.15)":"none"}}>
+                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:12}}>
+                  <div style={{width:8,height:8,borderRadius:"50%",background:sc.color}}/>
+                  <div style={{fontSize:9,fontWeight:700,color:sc.color,textTransform:"uppercase",letterSpacing:.8}}>{sc.label}</div>
+                  <div style={{marginLeft:"auto",fontSize:10,fontWeight:700,color:"#94a3b8",background:"#e2e8f0",borderRadius:20,padding:"1px 7px"}}>{cards.length}</div>
+                </div>
+                <div style={{display:"flex",flexDirection:"column",gap:8,minHeight:60}}>
+                  {cards.map(function(acc) {
+                    var fc = FIT_CONFIG[acc.fit]||FIT_CONFIG.ALTO;
+                    var isDragging = dragId===acc.id;
+                    return (
+                      <div key={acc.id}
+                        onMouseDown={function(e){startMouseDrag(e,acc,col);}}
+                        onTouchStart={function(e){startTouchDrag(e,acc,col);}}
+                        onClick={function(){if(!dragId)props.onOpen(acc);}}
+                        style={{background:"#fff",border:"1px solid "+(isDragging?"#10b981":"#edf0f7"),borderRadius:14,padding:"12px 14px",cursor:isDragging?"grabbing":"grab",touchAction:"none",opacity:isDragging?0.25:1,transition:"opacity .1s",position:"relative"}}>
+                        <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:3}}>
+                          <div style={{fontSize:12,fontWeight:700,color:"#0f172a",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{acc.nome}</div>
+                          <div style={{fontSize:11,color:"#cbd5e1",marginLeft:6,flexShrink:0,letterSpacing:2}}>{"..."}</div>
+                        </div>
+                        <div style={{fontSize:10,color:"#94a3b8",marginBottom:8,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{acc.setor}</div>
+                        <div style={{display:"flex",gap:5}}>
+                          <span style={{background:fc.bg,border:"1px solid "+fc.border,color:fc.text,borderRadius:6,padding:"2px 7px",fontSize:8,fontWeight:700}}>{"FIT "+acc.fit}</span>
+                          <span style={{fontSize:8,color:TIER_COLOR[acc.tier]||"#94a3b8",fontWeight:700}}>{acc.tier}</span>
+                        </div>
                       </div>
-                      <div style={{fontSize:10,color:"#94a3b8",marginBottom:8,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{acc.setor}</div>
-                      <div style={{display:"flex",gap:5}}>
-                        <span style={{background:fc.bg,border:"1px solid "+fc.border,color:fc.text,borderRadius:6,padding:"2px 7px",fontSize:8,fontWeight:700}}>{"FIT "+acc.fit}</span>
-                        <span style={{fontSize:8,color:TIER_COLOR[acc.tier]||"#94a3b8",fontWeight:700}}>{acc.tier}</span>
-                      </div>
+                    );
+                  })}
+                  {cards.length===0&&(
+                    <div style={{textAlign:"center",padding:"28px 8px",color:isOver?"#059669":"#cbd5e1",fontSize:11,border:"2px dashed "+(isOver?"#10b981":"#e8edf4"),borderRadius:10,transition:"all .15s",fontWeight:isOver?600:400}}>
+                      {isOver?"Soltar aqui":"Vazio"}
                     </div>
-                  );
-                })}
-                {cards.length===0&&(
-                  <div style={{textAlign:"center",padding:"28px 8px",color:isOver?"#059669":"#cbd5e1",fontSize:11,border:"2px dashed "+(isOver?"#10b981":"#e8edf4"),borderRadius:10,transition:"all .15s",fontWeight:isOver?600:400}}>
-                    {isOver?"Soltar aqui":"Vazio"}
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+        {dragId&&(
+          <div style={{marginTop:10,textAlign:"center",fontSize:11,color:"#94a3b8"}}>
+            {"Solte sobre a coluna de destino"}
+          </div>
+        )}
       </div>
-      {dragId&&<div style={{marginTop:10,textAlign:"center",fontSize:11,color:"#94a3b8"}}>Segure e arraste para outra coluna</div>}
+
+      {dragId && dragAcc && (
+        <div style={{position:"fixed",left:ghostPos.x,top:ghostPos.y,width:160,zIndex:9999,pointerEvents:"none",transform:"rotate(3deg) scale(1.05)",boxShadow:"0 20px 60px rgba(15,23,42,.2),0 4px 16px rgba(16,185,129,.2)",borderRadius:14}}>
+          <div style={{background:"#fff",border:"1.5px solid #10b981",borderRadius:14,padding:"12px 14px"}}>
+            <div style={{fontSize:12,fontWeight:700,color:"#0f172a",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginBottom:3}}>{dragAcc.nome}</div>
+            <div style={{fontSize:10,color:"#94a3b8",marginBottom:8,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{dragAcc.setor}</div>
+            {ghostFc&&(
+              <span style={{background:ghostFc.bg,border:"1px solid "+ghostFc.border,color:ghostFc.text,borderRadius:6,padding:"2px 7px",fontSize:8,fontWeight:700}}>{"FIT "+dragAcc.fit}</span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// ── ACCOUNT MODAL ─────────────────────────────────────────────────────────────
+
+// -- ACCOUNT MODAL -------------------------------------------------------------
+function exportAccountPDF(acc, d) {
+  function safe(path) {
+    try { var parts=path.split("."); var cur=d||{}; for(var i=0;i<parts.length;i++){cur=cur[parts[i]];if(cur==null)return null;} return cur; } catch(e){return null;}
+  }
+  function safeA(path) { var v=safe(path); return Array.isArray(v)?v:[]; }
+  var nome = acc.nome || "";
+  var setor = acc.setor || "";
+  var fit = (d&&d.fit&&d.fit.score) || acc.fit || "";
+  var tier = acc.tier || "";
+  var resumo = safe("empresa.resumo") || "";
+  var dores = safeA("dores.principais");
+  var triggers = safeA("triggers");
+  var stakeholders = safeA("stakeholders");
+  var spin = safeA("estrategia.perguntas_spin");
+  var objecoes = safeA("estrategia.objecoes");
+  var ae = safeA("proximos_passos.ae");
+  var bdr = safeA("proximos_passos.bdr");
+  var prazo = safe("proximos_passos.prazo") || "";
+  var emails = safeA("estrategia.emails");
+
+  var html = "<html><head><title>Account Map - "+nome+"</title><style>";
+  html += "body{font-family:Verdana,sans-serif;padding:32px;color:#0f172a;font-size:12px;line-height:1.7;max-width:800px;margin:0 auto}";
+  html += "h1{font-size:20px;color:#0f172a;margin-bottom:4px}";
+  html += "h2{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#10b981;margin:24px 0 8px;border-bottom:2px solid #e2e8f0;padding-bottom:4px}";
+  html += ".meta{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}";
+  html += ".badge{padding:3px 10px;border-radius:6px;font-size:9px;font-weight:700}";
+  html += ".fit-alto{background:#dcfce7;color:#065f46}.fit-medio{background:#fef3c7;color:#92400e}.fit-baixo{background:#fee2e2;color:#991b1b}";
+  html += ".tier{background:#f8fafc;border:1px solid #e2e8f0;color:#475569}";
+  html += "ul{list-style:none;padding:0;margin:0}";
+  html += "li{padding:4px 0 4px 14px;position:relative;border-bottom:1px solid #f8fafc}";
+  html += "li:before{content:'-';position:absolute;left:0;color:#10b981;font-weight:700}";
+  html += ".msg{background:#f8fafc;border-left:3px solid #10b981;padding:12px 16px;white-space:pre-wrap;margin:6px 0;font-size:11px;line-height:1.8}";
+  html += ".sk{background:#f8fafc;border-radius:8px;padding:10px 14px;margin-bottom:8px}";
+  html += ".footer{margin-top:32px;border-top:1px solid #e2e8f0;padding-top:12px;font-size:10px;color:#94a3b8}";
+  html += "@media print{body{padding:16px}h2{break-inside:avoid}}";
+  html += "</style></head><body>";
+  html += "<h1>"+nome+"</h1>";
+  html += "<div class='meta'><span class='badge fit-"+fit.toLowerCase()+"'>FIT "+fit+"</span><span class='badge tier'>"+tier+"</span><span class='badge tier'>"+setor+"</span></div>";
+  if (resumo) { html += "<h2>Resumo</h2><p>"+resumo+"</p>"; }
+  if (dores.length) { html += "<h2>Dores Mapeadas</h2><ul>"+dores.map(function(d2){return "<li>"+d2+"</li>";}).join("")+"</ul>"; }
+  if (triggers.length) { html += "<h2>Gatilhos Comerciais</h2><ul>"+triggers.map(function(t){return "<li>"+t+"</li>";}).join("")+"</ul>"; }
+  if (stakeholders.length) {
+    html += "<h2>Stakeholders</h2>";
+    stakeholders.forEach(function(s) {
+      html += "<div class='sk'><strong>"+s.cargo+"</strong> <span style='color:#94a3b8;font-size:10px'>("+s.prioridade+")</span><br/><span style='font-size:11px;color:#64748b'>"+s.angulo+"</span>";
+      if (s.email) html += "<br/><a href='mailto:"+s.email+"' style='color:#0ea5e9;font-size:10px'>"+s.email+"</a>";
+      if (s.linkedin) html += " <a href='"+s.linkedin+"' style='color:#0a66c2;font-size:10px'>LinkedIn</a>";
+      html += "</div>";
+    });
+  }
+  if (emails.length) {
+    html += "<h2>Mensagens</h2>";
+    emails.forEach(function(m,i) {
+      html += "<p style='font-size:10px;color:#64748b;margin:8px 0 4px'><strong>Template "+(i+1)+"</strong> - Assunto: "+m.assunto+"</p>";
+      html += "<div class='msg'>"+m.corpo+"</div>";
+    });
+  }
+  if (spin.length) { html += "<h2>Perguntas SPIN</h2><ul>"+spin.map(function(q){return "<li>"+q+"</li>";}).join("")+"</ul>"; }
+  if (objecoes.length) {
+    html += "<h2>Objecoes e Respostas</h2>";
+    objecoes.forEach(function(o) {
+      html += "<div class='sk'><strong style='color:#92400e'>\""+o.objecao+"\"</strong><br/><span style='font-size:11px'>-> "+o.resposta+"</span></div>";
+    });
+  }
+  if (ae.length || bdr.length) {
+    html += "<h2>Plano de Acao</h2><div style='display:flex;gap:20px'>";
+    if (ae.length) { html += "<div style='flex:1'><strong style='font-size:10px;color:#10b981'>AE</strong><ul style='margin-top:6px'>"+ae.map(function(a){return "<li>"+a+"</li>";}).join("")+"</ul></div>"; }
+    if (bdr.length) { html += "<div style='flex:1'><strong style='font-size:10px;color:#f59e0b'>BDR</strong><ul style='margin-top:6px'>"+bdr.map(function(a){return "<li>"+a+"</li>";}).join("")+"</ul></div>"; }
+    html += "</div>";
+    if (prazo) html += "<p style='margin-top:12px;font-size:11px'><strong>Prazo:</strong> "+prazo+"</p>";
+  }
+  html += "<div class='footer'>Account Mapper BDR Helper Pro V1 - Conviso Application Security - Andrei Heimann - "+new Date().toLocaleDateString("pt-BR")+"</div>";
+  html += "</body></html>";
+  var w = window.open("","_blank");
+  if (!w) return;
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function(){w.print();}, 500);
+}
+
 function AccountModal(props) {
   var acc = props.acc;
   var d = acc.data || {};
@@ -658,12 +789,12 @@ function AccountModal(props) {
   var triggers=safeArr(sd("triggers"));
   var noticias=safeArr(sd("noticias"));
   var spin=safeArr(sd("estrategia.perguntas_spin"));
-  var objecoes=safeArr(sd("estrategia.objeções"));
-  var ae=safeArr(sd("próximos_passos.ae"));
-  var bdr=safeArr(sd("próximos_passos.bdr"));
-  var prazo=sd("próximos_passos.prazo")||"";
+  var objecoes=safeArr(sd("estrategia.objecoes"));
+  var ae=safeArr(sd("proximos_passos.ae"));
+  var bdr=safeArr(sd("proximos_passos.bdr"));
+  var prazo=sd("proximos_passos.prazo")||"";
   var useCases=safeArr(sd("fit.use_cases"));
-  var solucoes=safeArr(sd("fit.soluções_conviso"));
+  var solucoes=safeArr(sd("fit.solucoes_conviso"));
   var fitJust=sd("fit.justificativa")||"";
   var concorrentes=safeArr(sd("mercado.competidores_provedor"));
   var CHANNELS=[{key:"emails",label:"E-mail",color:"#0ea5e9",bg:"rgba(14,165,233,.08)",isObj:true},{key:"inmails",label:"InMail",color:"#0a66c2",bg:"rgba(10,102,194,.08)",isObj:true},{key:"whatsapps",label:"WhatsApp",color:"#16a34a",bg:"rgba(22,163,74,.08)",isObj:false},{key:"cold_calls",label:"Cold Call",color:"#92400e",bg:"#fef3c7",isObj:false}];
@@ -690,7 +821,13 @@ function AccountModal(props) {
               <div style={{display:"flex",gap:4,flexWrap:"wrap",maxWidth:200}}>
                 {STATUS_ORDER.map(function(s){var sc2=STATUS_CONFIG[s];return <button key={s} onClick={function(){props.onStatusChange(acc.id,s);}} style={{background:acc.status===s?sc2.bg:"#f8fafc",border:"1px solid "+(acc.status===s?sc2.border:"#e2e8f0"),color:acc.status===s?sc2.color:"#94a3b8",borderRadius:6,padding:"3px 8px",fontSize:9,fontWeight:600,cursor:"pointer",fontFamily:"inherit",transition:"all .15s"}}>{sc2.label}</button>;})}
               </div>
-              <button onClick={props.onClose} style={{background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:10,padding:"7px 14px",cursor:"pointer",color:"#64748b",fontSize:12,fontWeight:600,fontFamily:"inherit"}}>Fechar</button>
+              <div style={{display:"flex",gap:6}}>
+                <button onClick={function(){exportAccountPDF(acc,d);}} style={{display:"flex",alignItems:"center",gap:6,background:"#eff6ff",border:"1px solid #bfdbfe",borderRadius:10,padding:"7px 14px",cursor:"pointer",color:"#0369a1",fontSize:12,fontWeight:600,fontFamily:"inherit"}}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                  {"PDF"}
+                </button>
+                <button onClick={props.onClose} style={{background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:10,padding:"7px 14px",cursor:"pointer",color:"#64748b",fontSize:12,fontWeight:600,fontFamily:"inherit"}}>{"Fechar"}</button>
+              </div>
             </div>
           </div>
           <div className="modal-tabs" style={{display:"flex",gap:0,overflowX:"auto"}}>
@@ -709,7 +846,7 @@ function AccountModal(props) {
               {triggers.length>0&&<Sec title="Gatilhos Comerciais">{triggers.map(function(t,i){return <R key={i} icon="T" color="#7c3aed">{t}</R>;})}</Sec>}
               {sinais.length>0&&<Sec title="Sinais de Intenção"><div style={{background:"#0c2340",borderRadius:12,padding:"12px 16px"}}>{sinais.map(function(s,i){return <div key={i} style={{fontSize:11.5,color:"#7dd3fc",lineHeight:1.6,display:"flex",gap:8,marginBottom:5}}><span style={{color:"#38bdf8",flexShrink:0}}>o</span>{s}</div>;})}</div></Sec>}
               {concorrentes.length>0&&<Sec title="Concorrentes Prováveis"><div style={{display:"flex",flexWrap:"wrap",gap:6}}>{concorrentes.map(function(cc,i){return <span key={i} style={{background:"#fef3c7",border:"1px solid #f59e0b",color:"#92400e",borderRadius:8,padding:"3px 10px",fontSize:10,fontWeight:600}}>{cc}</span>;})}</div></Sec>}
-              {noticias.length>0&&<Sec title="Notícias e Contexto">{noticias.map(function(n,i){return <div key={i} style={{background:"#f8fafc",border:"1px solid #e8edf4",borderRadius:12,padding:"12px 14px",marginBottom:8}}>{n.url?<a href={n.url} target="_blank" rel="noopener noreferrer" style={{fontSize:12.5,fontWeight:700,color:"#0ea5e9",textDecoration:"none",display:"block",marginBottom:3}}>{n.titulo}</a>:<div style={{fontSize:12.5,fontWeight:700,color:"#0f172a",marginBottom:3}}>{n.titulo}</div>}<div style={{fontSize:11.5,color:"#64748b",lineHeight:1.6,marginBottom:3}}>{n.resumo}</div><div style={{fontSize:10,color:"#059669",fontWeight:600}}>{"→ "+n.relevancia}</div></div>;})}</Sec>}
+              {noticias.length>0&&<Sec title="Notícias e Contexto">{noticias.map(function(n,i){return <div key={i} style={{background:"#f8fafc",border:"1px solid #e8edf4",borderRadius:12,padding:"12px 14px",marginBottom:8}}>{n.url?<a href={n.url} target="_blank" rel="noopener noreferrer" style={{fontSize:12.5,fontWeight:700,color:"#0ea5e9",textDecoration:"none",display:"block",marginBottom:3}}>{n.titulo}</a>:<div style={{fontSize:12.5,fontWeight:700,color:"#0f172a",marginBottom:3}}>{n.titulo}</div>}<div style={{fontSize:11.5,color:"#64748b",lineHeight:1.6,marginBottom:3}}>{n.resumo}</div><div style={{fontSize:10,color:"#059669",fontWeight:600}}>{"-> "+n.relevancia}</div></div>;})}</Sec>}
             </div>
           )}
 
@@ -719,7 +856,7 @@ function AccountModal(props) {
                 <div style={{marginBottom:20}}>
                   <div style={{fontSize:9,fontWeight:700,letterSpacing:1.5,color:"#059669",textTransform:"uppercase",marginBottom:10,display:"flex",alignItems:"center",gap:8}}>
                     <div style={{width:8,height:8,borderRadius:"50%",background:"#10b981",boxShadow:"0 0 8px rgba(16,185,129,.5)"}}/>
-                    {"Contatos Reais Encontrados — "+enrichedContacts.length+" perfil"+(enrichedContacts.length>1?"s":"")}
+                    {"Contatos Reais Encontrados , "+enrichedContacts.length+" perfil"+(enrichedContacts.length>1?"s":"")}
                     {enrichedSources.map(function(s,i){return <span key={i} style={{background:"rgba(16,185,129,.08)",border:"1px solid rgba(16,185,129,.2)",color:"#059669",borderRadius:6,padding:"2px 8px",fontSize:8,fontWeight:600}}>{s}</span>;})}
                   </div>
                   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:10,marginBottom:16}}>
@@ -731,7 +868,7 @@ function AccountModal(props) {
                           <div style={{display:"flex",flexDirection:"column",gap:5}}>
                             {contact.email&&(
                               <a href={"mailto:"+contact.email} style={{display:"flex",alignItems:"center",gap:6,fontSize:11,color:"#0ea5e9",textDecoration:"none",background:"rgba(14,165,233,.06)",borderRadius:6,padding:"4px 8px"}}>
-                                <span>✉</span>
+                                <span>{"@"}</span>
                                 <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{contact.email}</span>
                                 {contact.email_confidence>0&&<span style={{fontSize:8,color:"#94a3b8",marginLeft:"auto",flexShrink:0}}>{contact.email_confidence+"%"}</span>}
                               </a>
@@ -773,7 +910,7 @@ function AccountModal(props) {
                           <div style={{fontSize:11,fontWeight:700,color:"#059669",marginBottom:3}}>{"✓ Match: "+match.nome}</div>
                           <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                             {match.email&&<a href={"mailto:"+match.email} style={{fontSize:10,color:"#0ea5e9",textDecoration:"none"}}>{match.email}</a>}
-                            {match.linkedin&&<a href={match.linkedin.startsWith("http")?match.linkedin:"https://www.linkedin.com/in/"+match.linkedin} target="_blank" rel="noopener noreferrer" style={{fontSize:10,color:"#0a66c2",textDecoration:"none",fontWeight:600}}>Ver LinkedIn →</a>}
+                            {match.linkedin&&<a href={match.linkedin.startsWith("http")?match.linkedin:"https://www.linkedin.com/in/"+match.linkedin} target="_blank" rel="noopener noreferrer" style={{fontSize:10,color:"#0a66c2",textDecoration:"none",fontWeight:600}}>Ver LinkedIn -></a>}
                           </div>
                         </div>
                       )}
@@ -821,7 +958,7 @@ function AccountModal(props) {
                 {spin.map(function(q,i){
                   var tipo=q.startsWith("SITUAÇÃO")||q.startsWith("SITUAÇÃO")?"S":q.startsWith("PROBLEMA")?"P":q.startsWith("IMPLICAÇÃO")||q.startsWith("IMPLICAÇÃO")?"I":"N";
                   var tc=tipo==="S"?"#0ea5e9":tipo==="P"?"#92400e":tipo==="I"?"#991b1b":"#065f46";
-                  var clean=q.replace(/^(SITUAÇÃO|SITUAÇÃO|PROBLEMA|IMPLICAÇÃO|IMPLICAÇÃO|NECESSIDADE): /,"");
+                  var clean=q.indexOf(": ")>-1?q.slice(q.indexOf(": ")+2):q;
                   return (
                     <div key={i} style={{display:"flex",gap:10,padding:"10px 0",borderBottom:"1px solid #f1f5f9",alignItems:"flex-start"}}>
                       <span style={{background:tc+"20",border:"1px solid "+tc+"50",color:tc,borderRadius:6,padding:"2px 8px",fontSize:9,fontWeight:800,flexShrink:0,marginTop:1}}>{tipo}</span>
@@ -837,10 +974,10 @@ function AccountModal(props) {
                     return (
                       <div key={i} style={{background:"#f8fafc",border:"1.5px solid #e8edf4",borderRadius:14,padding:"14px 16px",marginBottom:10}}>
                         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8,gap:8}}>
-                          <div style={{fontSize:12,fontWeight:700,color:"#92400e",lineHeight:1.4,flex:1}}>{'"'+o.objeção+'"'}</div>
-                          <CopyBtn text={'"'+o.objeção+'"\n→ '+o.resposta}/>
+                          <div style={{fontSize:12,fontWeight:700,color:"#92400e",lineHeight:1.4,flex:1}}>{'"'+o.objecao+'"'}</div>
+                          <CopyBtn text={'"'+o.objecao+'"\n-> '+o.resposta}/>
                         </div>
-                        <div style={{fontSize:12,color:"#334155",lineHeight:1.65}}>{"→ "+o.resposta}</div>
+                        <div style={{fontSize:12,color:"#334155",lineHeight:1.65}}>{"-> "+o.resposta}</div>
                       </div>
                     );
                   })}
@@ -852,10 +989,10 @@ function AccountModal(props) {
           {activeTab==="plan"&&(
             <div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:18}}>
-                <Sec title="AE — Ações Imediatas">
+                <Sec title="AE , Ações Imediatas">
                   {ae.map(function(a,i){return <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"8px 0",borderBottom:"1px solid #f1f5f9",gap:8}}><div style={{display:"flex",gap:8,flex:1}}><span style={{color:"#10b981",flexShrink:0,fontWeight:700}}>{">"}</span><span style={{fontSize:12,color:"#334155",lineHeight:1.5}}>{a}</span></div><CopyBtn text={a}/></div>;})}
                 </Sec>
-                <Sec title="BDR — Ações de Suporte">
+                <Sec title="BDR , Ações de Suporte">
                   {bdr.map(function(a,i){return <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"8px 0",borderBottom:"1px solid #f1f5f9",gap:8}}><div style={{display:"flex",gap:8,flex:1}}><span style={{color:"#f59e0b",flexShrink:0,fontWeight:700}}>{">"}</span><span style={{fontSize:12,color:"#334155",lineHeight:1.5}}>{a}</span></div><CopyBtn text={a}/></div>;})}
                 </Sec>
               </div>
@@ -922,17 +1059,36 @@ function CollapsibleChannels(props) {
 }
 
 
+function downloadSeqPDF(seq) {
+  var TOUCH_LABELS = {email:"E-mail",linkedin:"InMail",whatsapp:"WhatsApp",call:"Cold Call",follow:"Follow-up",breakup:"Breakup"};
+  var html = "<html><head><title>"+((seq.account&&seq.account.nome)||"Sequencia")+"</title><style>body{font-family:Verdana,sans-serif;padding:32px;color:#0f172a;font-size:12px;line-height:1.7}h1{font-size:16px;color:#059669}h2{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#10b981;margin:20px 0 6px;border-bottom:2px solid #e2e8f0;padding-bottom:4px}.msg{background:#f8fafc;border-left:4px solid #10b981;padding:12px 16px;white-space:pre-wrap;margin:6px 0;font-size:11px;line-height:1.8}.day{display:inline-block;background:#dcfce7;color:#065f46;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700;margin-bottom:6px}.footer{margin-top:24px;border-top:1px solid #e2e8f0;padding-top:10px;font-size:10px;color:#94a3b8}</style></head><body>";
+  html += "<h1>Sequencia: "+((seq.account&&seq.account.nome)||"")+((seq.profile&&seq.profile.label)?" , "+seq.profile.label:"")+"</h1>";
+  html += "<p style='color:#64748b;font-size:11px'>Gerado em "+fmtDate(seq.createdAt)+" - BDR Helper Pro V1</p>";
+  (seq.touches||[]).forEach(function(t,i) {
+    html += "<h2>"+(TOUCH_LABELS[t.type]||t.type)+" , Dia "+t.day+"</h2>";
+    if (t.subject) html += "<div class='day'>Assunto: "+t.subject+"</div>";
+    html += "<div class='msg'>"+t.body+"</div>";
+  });
+  html += "<div class='footer'>BDR Helper Pro V1 , Conviso Application Security , Andrei Heimann</div></body></html>";
+  var w = window.open("","_blank");
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function(){w.print();}, 400);
+}
+
 function BibliotecaView(props) {
   var [seqs, setSeqs] = useState([]);
   var [loading, setLoading] = useState(true);
   var [openSeq, setOpenSeq] = useState(null);
+  var [viewMode, setViewMode] = useState("cards");
+  var [sortOrder, setSortOrder] = useState("date");
 
   useEffect(function() {
     storageList("seq:").then(function(keys) {
       if (!keys.length) { setLoading(false); props.onCountChange(0); return; }
       Promise.all(keys.map(storageGet)).then(function(items) {
-        var valid = items.filter(Boolean).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
-        setSeqs(valid); setLoading(false); props.onCountChange(valid.length);
+        var valid = items.filter(Boolean); setSeqs(valid);
+        setLoading(false); props.onCountChange(valid.length);
       });
     }).catch(function(){setLoading(false);});
   }, []);
@@ -949,20 +1105,42 @@ function BibliotecaView(props) {
 
   return (
     <div>
-      <div style={{marginBottom:28}}>
-        <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>Biblioteca</div>
-        <div style={{fontSize:13,color:"#64748b"}}>{seqs.length+" sequência"+(seqs.length!==1?"s":"")+" salva"+(seqs.length!==1?"s":"")+" — todas as cadências geradas ficam aqui."}</div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20,flexWrap:"wrap",gap:12}}>
+        <div>
+          <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>Biblioteca</div>
+          <div style={{fontSize:13,color:"#64748b"}}>{seqs.length+" sequência"+(seqs.length!==1?"s":"")+" salva"+(seqs.length!==1?"s":"")}</div>
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <select value={sortOrder} onChange={function(e){setSortOrder(e.target.value);}} style={{background:"#fff",border:"1.5px solid #e2e8f0",borderRadius:10,padding:"8px 12px",fontSize:12,color:"#475569",fontFamily:"inherit",cursor:"pointer",outline:"none"}}>
+            <option value="date">Mais recente</option>
+            <option value="az">A -> Z</option>
+            <option value="za">Z -> A</option>
+          </select>
+          <div style={{display:"flex",background:"#fff",border:"1.5px solid #e2e8f0",borderRadius:10,overflow:"hidden"}}>
+            <button onClick={function(){setViewMode("cards");}} title="Cards" style={{padding:"8px 12px",border:"none",background:viewMode==="cards"?"linear-gradient(135deg,#10b981,#059669)":"transparent",color:viewMode==="cards"?"#fff":"#94a3b8",cursor:"pointer",lineHeight:1}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </button>
+            <button onClick={function(){setViewMode("list");}} title="Lista" style={{padding:"8px 12px",border:"none",background:viewMode==="list"?"linear-gradient(135deg,#10b981,#059669)":"transparent",color:viewMode==="list"?"#fff":"#94a3b8",cursor:"pointer",lineHeight:1}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
       </div>
 
       {seqs.length===0 ? (
         <div style={{textAlign:"center",padding:"64px 0",background:"#f8fafc",borderRadius:20,border:"1.5px dashed #e2e8f0"}}>
-          <div style={{fontSize:36,marginBottom:12}}>📚</div>
-          <div style={{fontSize:15,fontWeight:700,color:"#334155",marginBottom:6}}>Nenhuma sequência salva ainda</div>
-          <div style={{fontSize:12,color:"#94a3b8",lineHeight:1.6}}>Vá para Sequências, gere uma cadência e clique em Salvar na Biblioteca.</div>
+          <div style={{fontSize:36,marginBottom:12}}>{"📚"}</div>
+          <div style={{fontSize:15,fontWeight:700,color:"#334155",marginBottom:6}}>{"Nenhuma sequência salva ainda"}</div>
+          <div style={{fontSize:12,color:"#94a3b8",lineHeight:1.6}}>{"Vá para Sequências, gere uma cadência e clique em Salvar na Biblioteca."}</div>
         </div>
       ) : (
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:16}}>
-          {seqs.map(function(seq){
+        viewMode==="cards" ? (
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:16}}>
+          {seqs.slice().sort(function(a,b){
+            if(sortOrder==="az") return ((a.account&&a.account.nome)||"").localeCompare((b.account&&b.account.nome)||"","pt");
+            if(sortOrder==="za") return ((b.account&&b.account.nome)||"").localeCompare((a.account&&a.account.nome)||"","pt");
+            return (b.createdAt||0)-(a.createdAt||0);
+          }).map(function(seq){
             var fc = FIT_CONFIG[(seq.account&&seq.account.fit)||"ALTO"]||FIT_CONFIG.ALTO;
             var TOUCH_TYPES_LOCAL = {email:{label:"E-mail",color:"#0ea5e9",bg:"rgba(14,165,233,.08)"},linkedin:{label:"InMail",color:"#0a66c2",bg:"rgba(10,102,194,.08)"},whatsapp:{label:"WhatsApp",color:"#16a34a",bg:"rgba(22,163,74,.08)"},call:{label:"Cold Call",color:"#92400e",bg:"#fef3c7"},follow:{label:"Follow-up",color:"#7c3aed",bg:"#f5f3ff"},breakup:{label:"Breakup",color:"#64748b",bg:"#f8fafc"}};
             return (
@@ -971,26 +1149,53 @@ function BibliotecaView(props) {
                 onMouseLeave={function(e){e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 2px 12px rgba(15,23,42,.06)";e.currentTarget.style.borderColor="#e8edf4";}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
                   <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:15,fontWeight:700,color:"#0f172a",marginBottom:3,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{seq.account&&seq.account.nome}</div>
+                    <div style={{fontSize:14,fontWeight:700,color:"#0f172a",marginBottom:3,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{seq.account&&seq.account.nome}</div>
                     <div style={{fontSize:11,color:"#94a3b8",marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{seq.profile&&seq.profile.label}</div>
                     <div style={{fontSize:10,color:"#cbd5e1"}}>{fmtDate(seq.createdAt)}</div>
                   </div>
                   <span style={{background:fc.bg,border:"1px solid "+fc.border,color:fc.text,borderRadius:8,padding:"3px 10px",fontSize:9,fontWeight:700,flexShrink:0,marginLeft:8}}>{"FIT "+(seq.account&&seq.account.fit)}</span>
                 </div>
-                <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:16}}>
+                <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:14}}>
                   {safeArr(seq.touches).map(function(t,i){
                     var tc=TOUCH_TYPES_LOCAL[t.type]||TOUCH_TYPES_LOCAL.email;
                     return <span key={i} style={{background:tc.bg,color:tc.color,borderRadius:6,padding:"2px 8px",fontSize:9,fontWeight:700}}>{"D"+t.day+" "+tc.label}</span>;
                   })}
                 </div>
-                <div style={{display:"flex",gap:8}}>
-                  <button onClick={function(){setOpenSeq(seq);}} style={{flex:1,background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",border:"none",borderRadius:10,padding:"9px 0",fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 3px 10px rgba(16,185,129,.3)"}}>Abrir Sequência</button>
-                  <button onClick={function(){deleteSeq(seq.id);}} style={{background:"none",border:"1px solid #fee2e2",color:"#ef4444",borderRadius:10,padding:"9px 12px",fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>Remover</button>
+                <div style={{display:"flex",gap:6}}>
+                  <button onClick={function(){setOpenSeq(seq);}} style={{flex:1,background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",border:"none",borderRadius:10,padding:"8px 0",fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>Abrir</button>
+                  <button onClick={function(){downloadSeqPDF(seq);}} title="Baixar PDF" style={{background:"#eff6ff",border:"1px solid #bfdbfe",color:"#0369a1",borderRadius:10,padding:"8px 10px",fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>PDF</button>
+                  <button onClick={function(){deleteSeq(seq.id);}} style={{background:"none",border:"1px solid #fee2e2",color:"#ef4444",borderRadius:10,padding:"8px 10px",fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>x</button>
                 </div>
               </div>
             );
           })}
         </div>
+        ) : (
+        <div style={{display:"flex",flexDirection:"column",gap:6}}>
+          {seqs.slice().sort(function(a,b){
+            if(sortOrder==="az") return ((a.account&&a.account.nome)||"").localeCompare((b.account&&b.account.nome)||"","pt");
+            if(sortOrder==="za") return ((b.account&&b.account.nome)||"").localeCompare((a.account&&a.account.nome)||"","pt");
+            return (b.createdAt||0)-(a.createdAt||0);
+          }).map(function(seq){
+            var fc=FIT_CONFIG[(seq.account&&seq.account.fit)||"ALTO"]||FIT_CONFIG.ALTO;
+            return (
+              <div key={seq.id} style={{background:"#fff",border:"1px solid #e8edf4",borderRadius:14,padding:"12px 18px",display:"flex",alignItems:"center",gap:14,transition:"all .2s"}}
+                onMouseEnter={function(e){e.currentTarget.style.borderColor="#10b981";e.currentTarget.style.boxShadow="0 2px 12px rgba(16,185,129,.08)";}}
+                onMouseLeave={function(e){e.currentTarget.style.borderColor="#e8edf4";e.currentTarget.style.boxShadow="";}}>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:13.5,fontWeight:700,color:"#0f172a",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{seq.account&&seq.account.nome}</div>
+                  <div style={{fontSize:11,color:"#94a3b8",marginTop:1}}>{seq.profile&&seq.profile.label}</div>
+                </div>
+                <span style={{background:fc.bg,border:"1px solid "+fc.border,color:fc.text,borderRadius:7,padding:"2px 8px",fontSize:9,fontWeight:700,flexShrink:0}}>{"FIT "+(seq.account&&seq.account.fit)}</span>
+                <span style={{fontSize:10,color:"#94a3b8",flexShrink:0}}>{fmtDate(seq.createdAt)}</span>
+                <button onClick={function(){setOpenSeq(seq);}} style={{background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",border:"none",borderRadius:8,padding:"5px 12px",fontSize:10,fontWeight:600,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>Abrir</button>
+                <button onClick={function(){downloadSeqPDF(seq);}} style={{background:"#eff6ff",border:"1px solid #bfdbfe",color:"#0369a1",borderRadius:8,padding:"5px 10px",fontSize:10,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>PDF</button>
+                <button onClick={function(){deleteSeq(seq.id);}} style={{background:"none",border:"1px solid #fee2e2",color:"#ef4444",borderRadius:8,padding:"5px 8px",fontSize:10,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>x</button>
+              </div>
+            );
+          })}
+        </div>
+        )
       )}
 
       {openSeq&&<SequenceModal seq={openSeq} onClose={function(){setOpenSeq(null);}}/>}
@@ -1013,7 +1218,41 @@ function R(props) {
   return <div style={{display:"flex",gap:8,padding:"7px 0",borderBottom:"1px solid #f1f5f9",fontSize:12.5,color:"#334155",lineHeight:1.55}}><span style={{color:props.color,flexShrink:0,fontWeight:700}}>{props.icon}</span>{props.children}</div>;
 }
 
-// ── SEARCH VIEW ───────────────────────────────────────────────────────────────
+// -- SEARCH VIEW ---------------------------------------------------------------
+
+function LoadingStatus() {
+  var steps = [
+    {text:"Consultando fontes públicas com IA...", icon:"🔍"},
+    {text:"Mapeando stakeholders e estrutura da empresa...", icon:"🧭"},
+    {text:"Gerando fit score e dores de AppSec...", icon:"⚡"},
+    {text:"Criando mensagens personalizadas por canal...", icon:"✉"},
+    {text:"Montando plano de prospecção...", icon:"🎯"},
+  ];
+  var [step, setStep] = useState(0);
+  useEffect(function() {
+    var t = setInterval(function() {
+      setStep(function(s) { return (s+1) % steps.length; });
+    }, 1800);
+    return function() { clearInterval(t); };
+  }, []);
+  return (
+    <div style={{marginTop:16,background:"linear-gradient(135deg,rgba(16,185,129,.06),rgba(14,165,233,.04))",border:"1.5px solid rgba(16,185,129,.2)",borderRadius:16,padding:"16px 20px"}}>
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
+        <div style={{width:8,height:8,borderRadius:"50%",background:"#10b981",boxShadow:"0 0 0 3px rgba(16,185,129,.2)",animation:"pulse 1s ease-in-out infinite",flexShrink:0}}/>
+        <span style={{fontSize:13,color:"#059669",fontWeight:700}}>BDR Helper Pro com IA</span>
+        <span style={{fontSize:10,color:"#94a3b8",marginLeft:"auto"}}>{"análise em tempo real"}</span>
+      </div>
+      <div style={{fontSize:13,color:"#334155",lineHeight:1.6,display:"flex",alignItems:"center",gap:8}}>
+        <span style={{fontSize:16}}>{steps[step].icon}</span>
+        <span style={{transition:"opacity .3s"}}>{steps[step].text}</span>
+      </div>
+      <div style={{marginTop:12,height:3,background:"#e2e8f0",borderRadius:3,overflow:"hidden"}}>
+        <div style={{height:"100%",background:"linear-gradient(90deg,#10b981,#0ea5e9)",borderRadius:3,animation:"shimmer 1.5s ease-in-out infinite",backgroundSize:"200% 100%"}}/>
+      </div>
+    </div>
+  );
+}
+
 function SearchView(props) {
   var [inputVal, setInputVal] = useState("");
   var [loading, setLoading] = useState(false);
@@ -1059,9 +1298,9 @@ function SearchView(props) {
     if (!noticias.length) noticias = [{titulo:"Buscar noticias recentes de "+company,resumo:"Pesquise '"+company+" seguranca ISO vulnerabilidade' no Google News.",relevancia:"Trigger identification",url:""}];
     return {
       empresa:{nome:company,setor:setor,resumo:resumo,tamanho:funcionarios||(tier==="Tier 1"?"Grande porte":"Medio porte"),faturamento:faturamento||null,clientes:clientes||null,estagio:"Consolidada / Scale-up",bolsa:bolsa||(isFintech||isSaaS?"Verificar B3/Nasdaq":"Capital fechado")},
-      fit:{score:"ALTO",justificativa:company+" atua em "+setor+", vertical de alta aderencia ao ICP da Conviso Application Security. Empresas nesse perfil tem times de desenvolvimento ativos e pressao crescente por AppSec formal de clientes e reguladores.",solucoes_conviso:["Conviso Platform","SAST — Analise Estatica","DAST — Teste Dinamico","SCA — Open Source Security","Gestão de Vulnerabilidades","Pentest Continuo","Security Champions Program"],use_cases:["SAST e DAST integrados ao pipeline CI/CD","Gestão centralizada de vulnerabilidades com SLA","Pentest continuo em APIs e aplicações web","Security Champions — devs como multiplicadores","Compliance ISO 27001 e PCI-DSS acelerado"]},
+      fit:{score:"ALTO",justificativa:company+" atua em "+setor+", vertical de alta aderencia ao ICP da Conviso Application Security. Empresas nesse perfil tem times de desenvolvimento ativos e pressao crescente por AppSec formal de clientes e reguladores.",solucoes_conviso:["Conviso Platform","SAST , Analise Estatica","DAST , Teste Dinamico","SCA , Open Source Security","Gestão de Vulnerabilidades","Pentest Continuo","Security Champions Program"],use_cases:["SAST e DAST integrados ao pipeline CI/CD","Gestão centralizada de vulnerabilidades com SLA","Pentest continuo em APIs e aplicações web","Security Champions , devs como multiplicadores","Compliance ISO 27001 e PCI-DSS acelerado"]},
       mercado:{competidores_provedor:["Veracode","Checkmarx","Snyk","SonarQube","Fluid Attacks","GitHub Advanced Security"]},
-      dores:{principais:["Vulnerabilidades críticas descobertas apenas em producao — custo 6x maior de remediação","Time de seguranca sobrecarregado, sem escala para acompanhar deploys","Clientes enterprise exigindo ISO 27001 ou SOC 2 para fechar contratos","PCI-DSS v4.0 exige SAST e DAST formais em aplicações de pagamento","Open source sem controle — dependencias com CVEs críticos em producao"],exposicao_regulatoria:["PCI-DSS v4.0","BACEN Res. 4.658","ISO 27001","LGPD","OWASP Top 10"],sinais_ativos:["Verificar vagas de AppSec Engineer e DevSecOps no LinkedIn","Checar certificação ISO 27001 publica — ausencia e oportunidade","Buscar CVEs públicos associados a produtos da empresa no NVD","Monitorar bug bounty programs ativos"]},
+      dores:{principais:["Vulnerabilidades críticas descobertas apenas em producao , custo 6x maior de remediação","Time de seguranca sobrecarregado, sem escala para acompanhar deploys","Clientes enterprise exigindo ISO 27001 ou SOC 2 para fechar contratos","PCI-DSS v4.0 exige SAST e DAST formais em aplicações de pagamento","Open source sem controle , dependencias com CVEs críticos em producao"],exposicao_regulatoria:["PCI-DSS v4.0","BACEN Res. 4.658","ISO 27001","LGPD","OWASP Top 10"],sinais_ativos:["Verificar vagas de AppSec Engineer e DevSecOps no LinkedIn","Checar certificação ISO 27001 publica , ausencia e oportunidade","Buscar CVEs públicos associados a produtos da empresa no NVD","Monitorar bug bounty programs ativos"]},
       triggers:["Processo de certificação ISO 27001 ou SOC 2 em andamento","Crescimento acelerado do time de engenharia","Incidente de seguranca recente ou vazamento de dados","Cliente enterprise bloqueando contrato por falta de AppSec","Lancamento de novo produto digital ou API publica"],
       stakeholders:[
         {cargo:"CISO / Head de Seguranca da Informação",angulo:"Decisor estrategico. Define budget e estrategia de AppSec. Sente pressao de clientes, reguladores e board. Quer reduzir risco sem frear o produto.",prioridade:"PRIMARIO",urgencia:"Alta"},
@@ -1069,33 +1308,33 @@ function SearchView(props) {
         {cargo:"Engineering Manager / Head de Engenharia",angulo:"Usuario direto e influenciador forte. Avalia friccao da integração e qualidade dos resultados no pipeline.",prioridade:"SECUNDARIO",urgencia:"Media"},
         {cargo:"CPO / Head de Produto",angulo:"Aliado estrategico. Quer AppSec como diferencial para fechar deals enterprise.",prioridade:"SECUNDARIO",urgencia:"Media"},
         {cargo:"Head de Compliance / Juridico",angulo:"Entra em deals com exigencia regulatoria. Valida aderencia da solução ao framework regulatorio.",prioridade:"TERCIARIO",urgencia:"Baixa"},
-        {cargo:"CFO / Diretor Financeiro",angulo:"Aprovacao de budget. Quer ROI claro — custo de vuln em producao 6x maior vs investimento na Conviso.",prioridade:"TERCIARIO",urgencia:"Baixa"},
+        {cargo:"CFO / Diretor Financeiro",angulo:"Aprovacao de budget. Quer ROI claro , custo de vuln em producao 6x maior vs investimento na Conviso.",prioridade:"TERCIARIO",urgencia:"Baixa"},
       ],
       noticias: noticias,
       estrategia:{
         tier:tier,
         emails:[
-          {assunto:company+" + Conviso — seguranca de aplicações",corpo:"Ola,\n\nChego ate voce porque "+company+" tem o perfil exato de empresa onde a Conviso Application Security gera mais impacto — time de engenharia ativo em "+setor+", com pressao crescente por AppSec formal.\n\nUma realidade comum em empresas similares:\n, Vulnerabilidades críticas descobertas apenas em producao — custo 6x maior\n, Time de seguranca sem escala para acompanhar o ritmo de deploys\n, Clientes enterprise bloqueando contratos por falta de AppSec formal\n\nA Conviso Platform integra SAST, DAST, SCA e gestão de vulnerabilidades no pipeline — com integração nativa ao GitHub, GitLab e Azure DevOps.\n\nConsigo te mostrar em 20 minutos como funciona.\n\nTem disponibilidade essa semana?\n\nAbraço,\nAndrei Heimann\nAccount Executive | Conviso Application Security\n(51) 99436-7667"},
-          {assunto:company+": quanto custa uma vulnerabilidade em producao?",corpo:"Ola,\n\nDireto ao ponto: o custo medio de remediação de uma vulnerabilidade descoberta em producao e 6x maior do que se detectada durante o desenvolvimento.\n\nEmpresas de "+setor+" reduziram esse custo em mais de 70% ao integrar SAST e DAST no pipeline — sem frear a velocidade de entrega.\n\nA "+company+" tem o perfil certo para esse resultado. Valeria 20 minutos?\n\nAbraço,\nAndrei Heimann | Conviso Application Security"},
-          {assunto:"Case: ISO 27001 em 60% menos tempo — empresa similar a "+company,corpo:"Ola,\n\nRecentemente ajudamos uma empresa de "+setor+" a:\n\n, Integrar SAST no pipeline CI/CD em menos de 2 semanas\n, Zerar vulnerabilidades críticas em producao nos primeiros 90 dias\n, Reduzir em 60% o tempo para certificação ISO 27001\n, Criar um programa Security Champions escalavel\n\nO time de engenharia não precisou parar o roadmap — o nosso CS conduziu tudo.\n\nFaz sentido eu te contar como funcionou? 20 minutos essa semana.\n\nAbraço,\nAndrei Heimann\nAccount Executive | Conviso Application Security\n(51) 99436-7667"},
+          {assunto:company+" + Conviso , seguranca de aplicações",corpo:"Ola,\n\nChego ate voce porque "+company+" tem o perfil exato de empresa onde a Conviso Application Security gera mais impacto , time de engenharia ativo em "+setor+", com pressao crescente por AppSec formal.\n\nUma realidade comum em empresas similares:\n, Vulnerabilidades críticas descobertas apenas em producao , custo 6x maior\n, Time de seguranca sem escala para acompanhar o ritmo de deploys\n, Clientes enterprise bloqueando contratos por falta de AppSec formal\n\nA Conviso Platform integra SAST, DAST, SCA e gestão de vulnerabilidades no pipeline , com integração nativa ao GitHub, GitLab e Azure DevOps.\n\nConsigo te mostrar em 20 minutos como funciona.\n\nTem disponibilidade essa semana?\n\nAbraço,\nAndrei Heimann\nAccount Executive | Conviso Application Security\n(51) 99436-7667"},
+          {assunto:company+": quanto custa uma vulnerabilidade em producao?",corpo:"Ola,\n\nDireto ao ponto: o custo medio de remediação de uma vulnerabilidade descoberta em producao e 6x maior do que se detectada durante o desenvolvimento.\n\nEmpresas de "+setor+" reduziram esse custo em mais de 70% ao integrar SAST e DAST no pipeline , sem frear a velocidade de entrega.\n\nA "+company+" tem o perfil certo para esse resultado. Valeria 20 minutos?\n\nAbraço,\nAndrei Heimann | Conviso Application Security"},
+          {assunto:"Case: ISO 27001 em 60% menos tempo , empresa similar a "+company,corpo:"Ola,\n\nRecentemente ajudamos uma empresa de "+setor+" a:\n\n, Integrar SAST no pipeline CI/CD em menos de 2 semanas\n, Zerar vulnerabilidades críticas em producao nos primeiros 90 dias\n, Reduzir em 60% o tempo para certificação ISO 27001\n, Criar um programa Security Champions escalavel\n\nO time de engenharia não precisou parar o roadmap , o nosso CS conduziu tudo.\n\nFaz sentido eu te contar como funcionou? 20 minutos essa semana.\n\nAbraço,\nAndrei Heimann\nAccount Executive | Conviso Application Security\n(51) 99436-7667"},
         ],
         inmails:[
-          {assunto:company+" + Conviso — vale 20 minutos?",corpo:"Ola, tudo bem?\n\nVi que "+company+" tem um time de engenharia ativo em "+setor+", exatamente o perfil onde a Conviso entrega mais resultado.\n\nEmpresa similar reduziu vulnerabilidades críticas em 70% e acelerou ISO 27001 em 60% apos integrar a Conviso Platform no pipeline.\n\nFaz sentido um papo de 20 minutos para eu entender como esta o processo de AppSec de voces hoje?\n\nAbraço,\nAndrei Heimann | AE Enterprise — Conviso Application Security"},
-          {assunto:"Uma pergunta sobre seguranca no ciclo de desenvolvimento",corpo:"Ola!\n\nPergunta direta: como voces identificam vulnerabilidades no codigo hoje — e automatizado no pipeline, manual, ou atraves de pentests pontuais?\n\nDependendo da resposta, posso te mostrar como empresas similares resolveram isso de forma estruturada com a Conviso Platform.\n\nVale um papo rápido?"},
-          {assunto:"Vi que "+company+" esta crescendo — parabens",corpo:"Ola,\n\nAcompanho o crescimento da "+company+" no setor de "+setor+".\n\nEmpresa que cresce rápido em produto digital normalmente enfrenta um desafio específico: a velocidade de desenvolvimento cresce mais rápido que a maturidade de seguranca — e o risco cresce junto.\n\nValeria 15 minutos para mostrar como outras empresas do mesmo segmento anteciparam esse problema?\n\nAbraço,\nAndrei Heimann | Conviso Application Security"},
+          {assunto:company+" + Conviso , vale 20 minutos?",corpo:"Ola, tudo bem?\n\nVi que "+company+" tem um time de engenharia ativo em "+setor+", exatamente o perfil onde a Conviso entrega mais resultado.\n\nEmpresa similar reduziu vulnerabilidades críticas em 70% e acelerou ISO 27001 em 60% apos integrar a Conviso Platform no pipeline.\n\nFaz sentido um papo de 20 minutos para eu entender como esta o processo de AppSec de voces hoje?\n\nAbraço,\nAndrei Heimann | AE Enterprise , Conviso Application Security"},
+          {assunto:"Uma pergunta sobre seguranca no ciclo de desenvolvimento",corpo:"Ola!\n\nPergunta direta: como voces identificam vulnerabilidades no codigo hoje , e automatizado no pipeline, manual, ou atraves de pentests pontuais?\n\nDependendo da resposta, posso te mostrar como empresas similares resolveram isso de forma estruturada com a Conviso Platform.\n\nVale um papo rápido?"},
+          {assunto:"Vi que "+company+" esta crescendo , parabens",corpo:"Ola,\n\nAcompanho o crescimento da "+company+" no setor de "+setor+".\n\nEmpresa que cresce rápido em produto digital normalmente enfrenta um desafio específico: a velocidade de desenvolvimento cresce mais rápido que a maturidade de seguranca , e o risco cresce junto.\n\nValeria 15 minutos para mostrar como outras empresas do mesmo segmento anteciparam esse problema?\n\nAbraço,\nAndrei Heimann | Conviso Application Security"},
         ],
         whatsapps:[
           "Oi [Nome], tudo bem? Sou o Andrei da Conviso Application Security. Vi que "+company+" tem um time de engenharia ativo em "+setor+". Trabalhamos com AppSec integrada ao pipeline de desenvolvimento. Valeria 15 minutos essa semana?",
           "Oi [Nome]! Andrei, da Conviso AppSec. Direto ao ponto: empresa do mesmo setor da "+company+" reduziu 70% das vulnerabilidades críticas e acelerou ISO 27001 em 60% com nossa plataforma. Tenho um case rápido. Posso te mandar?",
-          "Oi [Nome], Andrei da Conviso Application Security. Voce cuida de seguranca de aplicações ou engenharia na "+company+"? Se sim, tenho algo relevante — 15 minutos essa semana. Se não for voce, quem seria o contato certo?",
+          "Oi [Nome], Andrei da Conviso Application Security. Voce cuida de seguranca de aplicações ou engenharia na "+company+"? Se sim, tenho algo relevante , 15 minutos essa semana. Se não for voce, quem seria o contato certo?",
         ],
         cold_calls:[
-          "Bom dia [Nome], aqui e o Andrei da Conviso Application Security. Tenho 30 segundos? [PAUSA] Perfeito. Trabalho com seguranca de aplicações integrada ao ciclo de desenvolvimento — e a "+company+" tem exatamente o perfil onde a gente gera mais resultado em "+setor+". Empresas similares reduziram vulnerabilidades críticas em 70% sem frear o time de produto. Faz sentido eu te mostrar como funcionou? Quando voce tem 20 minutos?",
-          "[Nome], bom dia! Andrei da Conviso AppSec. Ligo porque a "+company+" apareceu no nosso radar. Uma pergunta: hoje voces tem algum processo automatizado de seguranca no pipeline — SAST, DAST, analise de dependencias? [ouvir] Entendi. E quando descobrem uma vulnerabilidade crítica, qual e o processo de priorização e correção hoje?",
-          "Oi [Nome], Andrei da Conviso AppSec. Vou ser rápido. Tenho um case de empresa de "+setor+" com perfil muito similar ao da "+company+" — reduziram 70% das vulns em producao e aceleraram a ISO 27001 em 60%. Vale 2 minutos agora ou prefere que eu ligue amanha?",
+          "Bom dia [Nome], aqui e o Andrei da Conviso Application Security. Tenho 30 segundos? [PAUSA] Perfeito. Trabalho com seguranca de aplicações integrada ao ciclo de desenvolvimento , e a "+company+" tem exatamente o perfil onde a gente gera mais resultado em "+setor+". Empresas similares reduziram vulnerabilidades críticas em 70% sem frear o time de produto. Faz sentido eu te mostrar como funcionou? Quando voce tem 20 minutos?",
+          "[Nome], bom dia! Andrei da Conviso AppSec. Ligo porque a "+company+" apareceu no nosso radar. Uma pergunta: hoje voces tem algum processo automatizado de seguranca no pipeline , SAST, DAST, analise de dependencias? [ouvir] Entendi. E quando descobrem uma vulnerabilidade crítica, qual e o processo de priorização e correção hoje?",
+          "Oi [Nome], Andrei da Conviso AppSec. Vou ser rápido. Tenho um case de empresa de "+setor+" com perfil muito similar ao da "+company+" , reduziram 70% das vulns em producao e aceleraram a ISO 27001 em 60%. Vale 2 minutos agora ou prefere que eu ligue amanha?",
         ],
         perguntas_spin:[
-          "SITUAÇÃO: Como esta estruturado hoje o processo de seguranca de aplicações — e manual, automatizado no pipeline, ou ainda não tem processo formal?",
+          "SITUAÇÃO: Como esta estruturado hoje o processo de seguranca de aplicações , e manual, automatizado no pipeline, ou ainda não tem processo formal?",
           "SITUAÇÃO: Qual o tamanho do time de engenharia e quantos deploys por semana fazem hoje?",
           "SITUAÇÃO: Voces usam alguma ferramenta de SAST, SCA ou analise de dependencias integrada ao pipeline hoje?",
           "SITUAÇÃO: Existe um time ou profissional dedicado de seguranca de aplicações?",
@@ -1107,24 +1346,24 @@ function SearchView(props) {
           "IMPLICAÇÃO: Voces estao em processo de certificação ISO 27001, SOC 2 ou PCI-DSS? Qual o impacto de não ter AppSec formalizada?",
           "IMPLICAÇÃO: Se ocorrer um incidente de seguranca em producao, qual seria o impacto financeiro, reputacional e contratual?",
           "NECESSIDADE: Se tivessem SAST, DAST e gestão de vulnerabilidades integrados no pipeline hoje, qual seria o impacto?",
-          "NECESSIDADE: O que precisaria acontecer para AppSec subir de prioridade na agenda — ou ja esta prioritaria?",
+          "NECESSIDADE: O que precisaria acontecer para AppSec subir de prioridade na agenda , ou ja esta prioritaria?",
           "NECESSIDADE: Se eu conseguisse te mostrar como integrar seguranca no pipeline em 2 semanas sem impactar o roadmap, isso seria suficiente para uma POC?",
         ],
         objecoes:[
           {objecao:"Ja usamos SonarQube / ferramenta interna",resposta:"SonarQube e otimo para qualidade de codigo. A diferenca com a Conviso Platform e a camada de gestão de vulnerabilidades com contexto de risco de negocio, DAST para aplicações em execucao, SCA para open source e o programa Security Champions. Posso mostrar como as duas se complementam em 20 minutos?"},
           {objecao:"Não temos budget para isso agora",resposta:"Entendo. Antes de fecharmos: qual o custo estimado de remediação de uma vuln crítica em producao, considerando horas de engenharia, rollback e risco regulatorio? Na maioria dos cases, o investimento na Conviso paga em um único incidente evitado."},
-          {objecao:"Nossa TI não tem capacidade de implementacao agora",resposta:"A integração com GitHub, GitLab ou Azure DevOps leva em media 2 semanas e e conduzida pelo nosso time de CS — o time de voces não precisa parar o roadmap."},
+          {objecao:"Nossa TI não tem capacidade de implementacao agora",resposta:"A integração com GitHub, GitLab ou Azure DevOps leva em media 2 semanas e e conduzida pelo nosso time de CS , o time de voces não precisa parar o roadmap."},
           {objecao:"Não e prioridade agora, temos outros projetos",resposta:"Faz sentido. Voces tem algum cliente enterprise ou processo de certificação onde AppSec sera exigida nos próximos 6 meses? Normalmente esse tema sobe de prioridade antes do esperado."},
           {objecao:"Ja fazemos pentest periodicamente",resposta:"Pentest pontual e um otimo começo. A diferenca: com deploys frequentes, vulnerabilidades novas surgem entre um pentest e outro. A Conviso complementa com analise continua no pipeline."},
-          {objecao:"Precisamos envolver o time de engenharia antes",resposta:"Perfeito — e o caminho certo. Posso preparar uma demo tecnica com o Engineering Manager mostrando a integração no pipeline real de voces. Quem seria o ponto de contato tecnico?"},
-          {objecao:"Ja tentamos uma ferramenta de AppSec e o time não adotou",resposta:"O que não funcionou — friccao na integração, muitos falsos positivos, ou o time não sabia priorizar os resultados? A Conviso tem um modelo de Security Champions específico para resolver esse problema de adocao."},
-          {objecao:"Preferimos fazer internamente",resposta:"Faz sentido. A Conviso não substitui o time interno — ela da a plataforma e os dados para o time trabalhar com mais eficiencia. Qual e a cobertura atual em aplicações monitoradas vs total do portfolio?"},
+          {objecao:"Precisamos envolver o time de engenharia antes",resposta:"Perfeito , e o caminho certo. Posso preparar uma demo tecnica com o Engineering Manager mostrando a integração no pipeline real de voces. Quem seria o ponto de contato tecnico?"},
+          {objecao:"Ja tentamos uma ferramenta de AppSec e o time não adotou",resposta:"O que não funcionou , friccao na integração, muitos falsos positivos, ou o time não sabia priorizar os resultados? A Conviso tem um modelo de Security Champions específico para resolver esse problema de adocao."},
+          {objecao:"Preferimos fazer internamente",resposta:"Faz sentido. A Conviso não substitui o time interno , ela da a plataforma e os dados para o time trabalhar com mais eficiencia. Qual e a cobertura atual em aplicações monitoradas vs total do portfolio?"},
         ]
       },
       proximos_passos:{
-        ae:["Mapear organograma no LinkedIn Sales Navigator — foco em CISO, CTO e Head de Engenharia da "+company,"Pesquisar vagas abertas de AppSec Engineer, Security Engineer e DevSecOps — sinal de dor ativa","Verificar certificação ISO 27001 publica da "+company+" — ausencia e oportunidade direta","Buscar CVEs públicos associados a produtos da "+company+" no NVD ou GitHub Security Advisories","Preparar business case com custo de remediação de vuln em producao vs investimento na Conviso","Enviar InMail personalizado ao CISO ou CTO referenciando o contexto regulatorio do setor de "+setor],
-        bdr:["Cold call focado em CISO e CTO — não confundir com outros perfis de seguranca","Enviar WhatsApp com Loom personalizado referenciando o case mais relevante do segmento","Disparar sequência de 4 emails (Custo de Vuln, Case, ISO 27001, FUP Final)","Monitorar sinais via 6Sense — alertar AE sobre contas com intencao ativa","Mapear eventos do setor: Mind The Sec, Security Leaders, CIAB, eventos de tecnologia"],
-        prazo:"Primeira abordagem em ate 48 horas — prioridade Tier 1 se ha sinal de certificação, incidente ou cliente enterprise exigindo AppSec"
+        ae:["Mapear organograma no LinkedIn Sales Navigator , foco em CISO, CTO e Head de Engenharia da "+company,"Pesquisar vagas abertas de AppSec Engineer, Security Engineer e DevSecOps , sinal de dor ativa","Verificar certificação ISO 27001 publica da "+company+" , ausencia e oportunidade direta","Buscar CVEs públicos associados a produtos da "+company+" no NVD ou GitHub Security Advisories","Preparar business case com custo de remediação de vuln em producao vs investimento na Conviso","Enviar InMail personalizado ao CISO ou CTO referenciando o contexto regulatorio do setor de "+setor],
+        bdr:["Cold call focado em CISO e CTO , não confundir com outros perfis de seguranca","Enviar WhatsApp com Loom personalizado referenciando o case mais relevante do segmento","Disparar sequência de 4 emails (Custo de Vuln, Case, ISO 27001, FUP Final)","Monitorar sinais via 6Sense , alertar AE sobre contas com intencao ativa","Mapear eventos do setor: Mind The Sec, Security Leaders, CIAB, eventos de tecnologia"],
+        prazo:"Primeira abordagem em ate 48 horas , prioridade Tier 1 se ha sinal de certificação, incidente ou cliente enterprise exigindo AppSec"
       }
     };
   }
@@ -1190,7 +1429,7 @@ function SearchView(props) {
         <div style={{fontSize:26,fontWeight:800,color:"#0f172a",marginBottom:6,letterSpacing:"-0.5px"}}>
           Account <span style={{color:"#10b981"}}>Mapping</span>
         </div>
-        <div style={{fontSize:13,color:"#64748b",marginBottom:28,lineHeight:1.7}}>Digite o nome da empresa para gerar o mapeamento completo. O resultado e salvo automaticamente em Contas.</div>
+        <div style={{fontSize:13,color:"#64748b",marginBottom:28,lineHeight:1.7}}>{"Digite o nome da empresa para gerar o mapeamento completo. O resultado é salvo automaticamente em Contas."}</div>
         <div style={{display:"flex",gap:10}}>
           <input value={inputVal} onChange={function(e){setInputVal(e.target.value);}} onKeyDown={function(e){if(e.key==="Enter")handleSearch();}}
             placeholder="Ex: Nubank, TOTVS, Stone..."
@@ -1198,22 +1437,19 @@ function SearchView(props) {
             onFocus={function(e){e.target.style.borderColor="#10b981";}} onBlur={function(e){e.target.style.borderColor="#e2e8f0";}}/>
           <button onClick={handleSearch} disabled={loading||!inputVal.trim()}
             style={{background:loading||!inputVal.trim()?"#e2e8f0":"linear-gradient(135deg,#10b981,#059669)",color:loading||!inputVal.trim()?"#94a3b8":"#fff",border:"none",borderRadius:12,padding:"14px 28px",fontSize:13,fontWeight:600,cursor:loading||!inputVal.trim()?"not-allowed":"pointer",fontFamily:"inherit",boxShadow:loading||!inputVal.trim()?"none":"0 4px 14px rgba(16,185,129,.35)",transition:"all .2s",whiteSpace:"nowrap"}}>
-            {loading?"Analisando...":"Analisar"}
+            {loading?"Buscando na internet...":"Analisar"}
           </button>
         </div>
         {searchError && (
-          <div style={{marginTop:14,background:"#fffbeb",border:"1px solid #fde68a",borderRadius:12,padding:"12px 16px",fontSize:12,color:"#92400e"}}>{searchError}</div>
-        )}
-
-        {searchError && (
           <div style={{marginTop:12,background:"#fffbeb",border:"1px solid #fde68a",borderRadius:12,padding:"12px 16px",fontSize:12,color:"#92400e"}}>{searchError}</div>
         )}
+
         {duplicate && (
           <div style={{marginTop:14,background:"#fff7ed",border:"1.5px solid #fb923c",borderRadius:14,padding:"14px 18px"}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10}}>
               <div>
                 <div style={{fontSize:13,fontWeight:700,color:"#9a3412",marginBottom:3}}>{"Conta já mapeada: "+duplicate.nome}</div>
-                <div style={{fontSize:11,color:"#c2410c"}}>{duplicate.setor + " — " + (STATUS_CONFIG[duplicate.status]&&STATUS_CONFIG[duplicate.status].label)}</div>
+                <div style={{fontSize:11,color:"#c2410c"}}>{duplicate.setor + " , " + (STATUS_CONFIG[duplicate.status]&&STATUS_CONFIG[duplicate.status].label)}</div>
               </div>
               <div style={{display:"flex",gap:8}}>
                 <button onClick={function(){props.onOpenAccount(duplicate);}} style={{background:"#ea580c",color:"#fff",border:"none",borderRadius:10,padding:"8px 16px",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>
@@ -1237,9 +1473,9 @@ function SearchView(props) {
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:14}}>
           {[
             {n:"1",title:"Busca",desc:"Analise qualquer empresa e gere o account mapping completo com fit, dores, stakeholders e mensagens."},
-            {n:"2",title:"Contas",desc:"Todas as empresas ficam salvas com status de prospecção. Nunca refaça uma busca, o histórico é permanente."},
+            {n:"2",title:"Contas",desc:"Todas as empresas ficam salvas com status de prospecção, organizadas por fit, tier e estágio."},
             {n:"3",title:"Sequências",desc:"Gere cadências de 6 toques personalizadas por stakeholder com scripts prontos para copiar e usar."},
-            {n:"4",title:"Pipeline",desc:"Kanban visual para acompanhar cada conta do mapeamento até o fechamento do deal."},
+            {n:"4",title:"Pipeline",desc:"Kanban visual para acompanhar cada conta do mapeamento até a conversão."},
           ].map(function(item) {
             return (
               <div key={item.n}>
@@ -1257,11 +1493,13 @@ function SearchView(props) {
   );
 }
 
-// ── ACCOUNTS VIEW ─────────────────────────────────────────────────────────────
+// -- ACCOUNTS VIEW -------------------------------------------------------------
 function AccountsView(props) {
   var accounts = props.accounts;
   var [filter, setFilter] = useState({fit:"",tier:"",status:""});
   var [search, setSearch] = useState("");
+  var [viewMode, setViewMode] = useState("cards");
+  var [sortOrder, setSortOrder] = useState("date");
 
   var filtered = accounts.filter(function(a) {
     if (filter.fit && a.fit !== filter.fit) return false;
@@ -1269,47 +1507,125 @@ function AccountsView(props) {
     if (filter.status && a.status !== filter.status) return false;
     if (search && !a.nome.toLowerCase().includes(search.toLowerCase()) && !a.setor.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
+  }).slice().sort(function(a,b) {
+    if (sortOrder === "az") return a.nome.localeCompare(b.nome, "pt");
+    if (sortOrder === "za") return b.nome.localeCompare(a.nome, "pt");
+    return (b.savedAt||0) - (a.savedAt||0);
   });
 
   var statCounts = {};
-  STATUS_ORDER.forEach(function(s){statCounts[s]=accounts.filter(function(a){return a.status===s;}).length;});
+  STATUS_ORDER.forEach(function(s) { statCounts[s] = accounts.filter(function(a){return a.status===s;}).length; });
+
+  function clearFilters() { setFilter({fit:"",tier:"",status:""}); setSearch(""); }
+  function toggleStatus(s) { setFilter(function(f){return Object.assign({},f,{status:f.status===s?"":s});}); }
+  function changeFit(v) { setFilter(function(f){return Object.assign({},f,{fit:v});}); }
+  function changeTier(v) { setFilter(function(f){return Object.assign({},f,{tier:v});}); }
+
+  var hasFilter = filter.fit || filter.tier || filter.status || search;
 
   return (
     <div>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:28,flexWrap:"wrap",gap:16}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20,flexWrap:"wrap",gap:12}}>
         <div>
           <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>Contas</div>
-          <div style={{fontSize:13,color:"#64748b"}}>{accounts.length+" empresa"+(accounts.length!==1?"s":"")+" mapeada"+(accounts.length!==1?"s":"")}</div>
+          <div style={{fontSize:13,color:"#64748b"}}>{accounts.length + " empresa" + (accounts.length!==1?"s":"") + " mapeada" + (accounts.length!==1?"s":"")}</div>
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+          <select value={sortOrder} onChange={function(e){setSortOrder(e.target.value);}} style={{background:"#fff",border:"1.5px solid #e2e8f0",borderRadius:10,padding:"8px 12px",fontSize:12,color:"#475569",fontFamily:"inherit",cursor:"pointer",outline:"none"}}>
+            <option value="date">Mais recente</option>
+            <option value="az">A - Z</option>
+            <option value="za">Z - A</option>
+          </select>
+          <div style={{display:"flex",background:"#fff",border:"1.5px solid #e2e8f0",borderRadius:10,overflow:"hidden"}}>
+            <button onClick={function(){setViewMode("cards");}} title="Cards" style={{padding:"8px 12px",border:"none",background:viewMode==="cards"?"linear-gradient(135deg,#10b981,#059669)":"transparent",color:viewMode==="cards"?"#fff":"#94a3b8",cursor:"pointer",lineHeight:1,fontFamily:"inherit"}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+            </button>
+            <button onClick={function(){setViewMode("list");}} title="Lista" style={{padding:"8px 12px",border:"none",background:viewMode==="list"?"linear-gradient(135deg,#10b981,#059669)":"transparent",color:viewMode==="list"?"#fff":"#94a3b8",cursor:"pointer",lineHeight:1,fontFamily:"inherit"}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
+
       <div className="status-chips" style={{display:"flex",gap:10,marginBottom:24,overflowX:"auto",paddingBottom:4}}>
-        {STATUS_ORDER.map(function(s){
-          var sc=STATUS_CONFIG[s]; var cnt=statCounts[s];
-          return <div key={s} onClick={function(){setFilter(function(f){return Object.assign({},f,{status:f.status===s?"":s});});}} style={{flexShrink:0,background:filter.status===s?sc.bg:"#fff",border:"1.5px solid "+(filter.status===s?sc.border:"#e8edf4"),borderRadius:14,padding:"12px 16px",cursor:"pointer",transition:"all .2s cubic-bezier(.22,1,.36,1)",textAlign:"center",minWidth:100,boxShadow:filter.status===s?"0 4px 16px rgba(15,23,42,.1)":"0 1px 4px rgba(15,23,42,.04)"}}>
-            <div style={{fontSize:20,fontWeight:800,color:filter.status===s?sc.color:"#64748b"}}>{cnt}</div>
-            <div style={{fontSize:9,fontWeight:600,color:filter.status===s?sc.color:"#94a3b8",textTransform:"uppercase",letterSpacing:.8,marginTop:2}}>{sc.label}</div>
-          </div>;
+        {STATUS_ORDER.map(function(s) {
+          var sc = STATUS_CONFIG[s];
+          var cnt = statCounts[s];
+          var isActive = filter.status === s;
+          return (
+            <div key={s} onClick={function(){toggleStatus(s);}} style={{flexShrink:0,background:isActive?sc.bg:"#fff",border:"1.5px solid "+(isActive?sc.border:"#e8edf4"),borderRadius:14,padding:"12px 16px",cursor:"pointer",transition:"all .2s",textAlign:"center",minWidth:100}}>
+              <div style={{fontSize:20,fontWeight:800,color:isActive?sc.color:"#64748b"}}>{cnt}</div>
+              <div style={{fontSize:9,fontWeight:600,color:isActive?sc.color:"#94a3b8",textTransform:"uppercase",letterSpacing:.8,marginTop:2}}>{sc.label}</div>
+            </div>
+          );
         })}
       </div>
+
       <div style={{display:"flex",gap:10,marginBottom:20,flexWrap:"wrap"}}>
-        <input value={search} onChange={function(e){setSearch(e.target.value);}} placeholder="Buscar por nome ou setor..."
+        <input value={search} onChange={function(e){setSearch(e.target.value);}}
+          placeholder="Buscar por nome ou setor..."
           style={{flex:1,minWidth:200,background:"#fff",border:"1.5px solid #e2e8f0",borderRadius:10,padding:"9px 14px",fontSize:13,color:"#0f172a",fontFamily:"inherit",outline:"none",transition:"border-color .2s"}}
-          onFocus={function(e){e.target.style.borderColor="#10b981";}} onBlur={function(e){e.target.style.borderColor="#e2e8f0";}}/>
-        {[["fit",["","ALTO","MEDIO","BAIXO"],["Fit","Fit Alto","Fit Medio","Fit Baixo"]],["tier",["","Tier 1","Tier 2","Tier 3"],["Tier","Tier 1","Tier 2","Tier 3"]]].map(function(cfg){
-          return <select key={cfg[0]} value={filter[cfg[0]]} onChange={function(e){setFilter(function(f){var n=Object.assign({},f);n[cfg[0]]=e.target.value;return n;});}} style={{background:"#fff",border:"1.5px solid #e2e8f0",borderRadius:10,padding:"9px 14px",fontSize:12,color:filter[cfg[0]]?"#0f172a":"#94a3b8",fontFamily:"inherit",cursor:"pointer",outline:"none"}}>
-            {cfg[1].map(function(v,i){return <option key={v} value={v}>{cfg[2][i]}</option>;})}</select>;
-        })}
-        {(filter.fit||filter.tier||filter.status||search)&&<button onClick={function(){setFilter({fit:"",tier:"",status:""});setSearch("");}} style={{background:"#fee2e2",border:"1px solid #fecdd3",color:"#991b1b",borderRadius:10,padding:"9px 14px",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>Limpar</button>}
+          onFocus={function(e){e.target.style.borderColor="#10b981";}}
+          onBlur={function(e){e.target.style.borderColor="#e2e8f0";}}/>
+        <select value={filter.fit} onChange={function(e){changeFit(e.target.value);}} style={{background:"#fff",border:"1.5px solid #e2e8f0",borderRadius:10,padding:"9px 14px",fontSize:12,color:filter.fit?"#0f172a":"#94a3b8",fontFamily:"inherit",cursor:"pointer",outline:"none"}}>
+          <option value="">Fit</option>
+          <option value="ALTO">Fit Alto</option>
+          <option value="MEDIO">Fit Medio</option>
+          <option value="BAIXO">Fit Baixo</option>
+        </select>
+        <select value={filter.tier} onChange={function(e){changeTier(e.target.value);}} style={{background:"#fff",border:"1.5px solid #e2e8f0",borderRadius:10,padding:"9px 14px",fontSize:12,color:filter.tier?"#0f172a":"#94a3b8",fontFamily:"inherit",cursor:"pointer",outline:"none"}}>
+          <option value="">Tier</option>
+          <option value="Tier 1">Tier 1</option>
+          <option value="Tier 2">Tier 2</option>
+          <option value="Tier 3">Tier 3</option>
+        </select>
+        {hasFilter && (
+          <button onClick={clearFilters} style={{background:"#fee2e2",border:"1px solid #fecdd3",color:"#991b1b",borderRadius:10,padding:"9px 14px",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>
+            Limpar
+          </button>
+        )}
       </div>
+
       {filtered.length===0 ? (
         <div style={{textAlign:"center",padding:"64px 0",background:"#f8fafc",borderRadius:20,border:"1.5px dashed #e2e8f0"}}>
-          <div style={{fontSize:36,marginBottom:12}}>🔍</div>
+          <div style={{fontSize:36,marginBottom:12}}>{"🔍"}</div>
           <div style={{fontSize:15,fontWeight:700,color:"#334155",marginBottom:6}}>{accounts.length===0?"Nenhuma conta mapeada ainda":"Nenhuma conta com esses filtros"}</div>
-          <div style={{fontSize:12,color:"#94a3b8"}}>{accounts.length===0?"Vá para Busca e analise sua primeira empresa":"Tente limpar os filtros"}</div>
+          <div style={{fontSize:12,color:"#94a3b8"}}>{accounts.length===0?"Va para Busca e analise sua primeira empresa":"Tente limpar os filtros"}</div>
+        </div>
+      ) : viewMode==="cards" ? (
+        <div className="card-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:16}}>
+          {filtered.map(function(acc) {
+            return <AccountCard key={acc.id} acc={acc} onOpen={props.onOpen} onStatusChange={props.onStatusChange} onDelete={props.onDelete}/>;
+          })}
         </div>
       ) : (
-        <div className="card-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:16}}>
-          {filtered.map(function(acc){return <AccountCard key={acc.id} acc={acc} onOpen={props.onOpen} onStatusChange={props.onStatusChange} onDelete={props.onDelete}/>;}) }
+        <div style={{display:"flex",flexDirection:"column",gap:6}}>
+          {filtered.map(function(acc) {
+            var fc = FIT_CONFIG[acc.fit]||FIT_CONFIG.ALTO;
+            var sc = STATUS_CONFIG[acc.status]||STATUS_CONFIG.prospecting;
+            return (
+              <div key={acc.id} style={{background:"#fff",border:"1px solid #e8edf4",borderRadius:14,padding:"12px 18px",display:"flex",alignItems:"center",gap:14,transition:"all .2s"}}
+                onMouseEnter={function(e){e.currentTarget.style.borderColor="#10b981";e.currentTarget.style.boxShadow="0 2px 12px rgba(16,185,129,.08)";}}
+                onMouseLeave={function(e){e.currentTarget.style.borderColor="#e8edf4";e.currentTarget.style.boxShadow="";}}>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:13.5,fontWeight:700,color:"#0f172a",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{acc.nome}</div>
+                  <div style={{fontSize:11,color:"#94a3b8",marginTop:2}}>{acc.setor}</div>
+                </div>
+                <span style={{background:fc.bg,border:"1px solid "+fc.border,color:fc.text,borderRadius:7,padding:"3px 9px",fontSize:9,fontWeight:700,flexShrink:0}}>{"FIT "+acc.fit}</span>
+                <span style={{background:"#f8fafc",border:"1px solid "+(TIER_COLOR[acc.tier]||"#e2e8f0"),color:TIER_COLOR[acc.tier]||"#94a3b8",borderRadius:7,padding:"3px 9px",fontSize:9,fontWeight:700,flexShrink:0}}>{acc.tier}</span>
+                <span style={{background:sc.bg,border:"1px solid "+sc.border,color:sc.color,borderRadius:7,padding:"3px 9px",fontSize:9,fontWeight:600,flexShrink:0,whiteSpace:"nowrap"}}>{sc.label}</span>
+                <span style={{fontSize:10,color:"#94a3b8",flexShrink:0}}>{fmtDate(acc.savedAt)}</span>
+                <button onClick={function(){props.onOpen(acc);}} style={{background:"linear-gradient(135deg,#10b981,#059669)",color:"#fff",border:"none",borderRadius:8,padding:"5px 12px",fontSize:10,fontWeight:600,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>Ver</button>
+                <button onClick={function(){props.onDelete(acc.id);}} style={{background:"none",border:"1px solid #fee2e2",color:"#ef4444",borderRadius:8,padding:"5px 8px",fontSize:10,cursor:"pointer",fontFamily:"inherit",flexShrink:0}}>x</button>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -1317,7 +1633,8 @@ function AccountsView(props) {
 }
 
 
-// ── INSIGHTS VIEW ─────────────────────────────────────────────────────────────
+
+// -- INSIGHTS VIEW -------------------------------------------------------------
 
 // Merge API-enriched contacts into stakeholder profiles
 function mergeStakeholders(stakeholders, contacts) {
@@ -1390,11 +1707,43 @@ function SemiCircleChart(props) {
   );
 }
 
+function exportRelatoriosPDF(accounts, filters) {
+  var filtered = accounts.filter(function(a) {
+    if (filters.fit && a.fit !== filters.fit) return false;
+    if (filters.tier && a.tier !== filters.tier) return false;
+    if (filters.nome && !a.nome.toLowerCase().includes(filters.nome.toLowerCase())) return false;
+    if (filters.from) { var d = new Date(filters.from); if (new Date(a.savedAt) < d) return false; }
+    if (filters.to)   { var d2 = new Date(filters.to); d2.setHours(23,59,59); if (new Date(a.savedAt) > d2) return false; }
+    return true;
+  });
+  var byStatus = {};
+  STATUS_ORDER.forEach(function(s){byStatus[s]=filtered.filter(function(a){return a.status===s;}).length;});
+  var html = "<html><head><title>Relatórios BDR Helper Pro</title><style>body{font-family:Verdana,sans-serif;padding:32px;color:#0f172a;font-size:12px}h1{color:#059669;font-size:18px}h2{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#10b981;margin:20px 0 8px;border-bottom:2px solid #e2e8f0;padding-bottom:4px}table{width:100%;border-collapse:collapse;margin-top:8px}th{background:#f8fafc;padding:8px 12px;text-align:left;font-size:10px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.8px}td{padding:8px 12px;border-bottom:1px solid #f1f5f9;font-size:11px}.fit-alto{color:#065f46;background:#dcfce7;padding:2px 7px;border-radius:5px;font-size:9px;font-weight:700}.fit-medio{color:#92400e;background:#fef3c7;padding:2px 7px;border-radius:5px;font-size:9px;font-weight:700}.fit-baixo{color:#991b1b;background:#fee2e2;padding:2px 7px;border-radius:5px;font-size:9px;font-weight:700}.footer{margin-top:24px;border-top:1px solid #e2e8f0;padding-top:10px;font-size:10px;color:#94a3b8}</style></head><body>";
+  html += "<h1>Relatório de Prospecção , BDR Helper Pro V1</h1>";
+  html += "<p style='color:#64748b;font-size:11px'>Gerado em "+new Date().toLocaleDateString("pt-BR")+" - "+filtered.length+" contas</p>";
+  html += "<h2>Funil de Status</h2><table><tr>";
+  STATUS_ORDER.forEach(function(s){html+="<th>"+STATUS_CONFIG[s].label+"</th>";});
+  html+="</tr><tr>";
+  STATUS_ORDER.forEach(function(s){html+="<td><strong>"+byStatus[s]+"</strong></td>";});
+  html+="</tr></table>";
+  html += "<h2>Lista de Contas ("+filtered.length+")</h2><table><tr><th>Empresa</th><th>Setor</th><th>Fit</th><th>Tier</th><th>Status</th><th>Salvo em</th></tr>";
+  filtered.forEach(function(a) {
+    var fitClass = a.fit==="ALTO"?"fit-alto":a.fit==="MEDIO"?"fit-medio":"fit-baixo";
+    html += "<tr><td><strong>"+a.nome+"</strong></td><td>"+a.setor+"</td><td><span class='"+fitClass+"'>"+a.fit+"</span></td><td>"+a.tier+"</td><td>"+(STATUS_CONFIG[a.status]&&STATUS_CONFIG[a.status].label||a.status)+"</td><td>"+fmtDate(a.savedAt)+"</td></tr>";
+  });
+  html += "</table><div class='footer'>BDR Helper Pro V1 , Conviso Application Security , Andrei Heimann</div></body></html>";
+  var w = window.open("","_blank");
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function(){w.print();}, 400);
+}
+
 function InsightsView(props) {
   var accounts = props.accounts;
   var total = accounts.length;
+  var [pdfFilters, setPdfFilters] = useState({fit:"",tier:"",nome:"",from:"",to:""});
 
-  // ── SVG Donut chart helper
+  // -- SVG Donut chart helper
   function buildDonutPaths(segments, cx, cy, r, innerR) {
     var total2=segments.reduce(function(s,seg){return s+(seg.value||0);},0)||1;
     var startAngle=-Math.PI/2;
@@ -1426,25 +1775,25 @@ function InsightsView(props) {
     );
   }
 
-  // ── Funnel by status
+  // -- Funnel by status
   var funnel = STATUS_ORDER.map(function(s) {
     return { status:s, label:STATUS_CONFIG[s].label, count:accounts.filter(function(a){return a.status===s;}).length, color:STATUS_CONFIG[s].color, bg:STATUS_CONFIG[s].bg, border:STATUS_CONFIG[s].border };
   });
   var maxFunnel = Math.max.apply(null, funnel.map(function(f){return f.count;})) || 1;
 
-  // ── By fit score
+  // -- By fit score
   var byFit = ["ALTO","MEDIO","BAIXO"].map(function(f) {
     var cnt = accounts.filter(function(a){return a.fit===f;}).length;
     return { fit:f, count:cnt, pct:total?Math.round(cnt/total*100):0, color:FIT_CONFIG[f].text, bg:FIT_CONFIG[f].bg, border:FIT_CONFIG[f].border };
   });
 
-  // ── By tier
+  // -- By tier
   var byTier = ["Tier 1","Tier 2","Tier 3"].map(function(t) {
     var cnt = accounts.filter(function(a){return a.tier===t;}).length;
     return { tier:t, count:cnt, pct:total?Math.round(cnt/total*100):0, color:TIER_COLOR[t]||"#94a3b8" };
   });
 
-  // ── By setor (top 6)
+  // -- By setor (top 6)
   var setorMap = {};
   accounts.forEach(function(a) {
     var s = (a.setor||"Outros").split("/")[0].trim();
@@ -1454,7 +1803,7 @@ function InsightsView(props) {
     .sort(function(a,b){return b.count-a.count;}).slice(0,6);
   var maxSetor = (bySetor[0]&&bySetor[0].count)||1;
 
-  // ── Velocity: accounts saved by week (last 8 weeks)
+  // -- Velocity: accounts saved by week (last 8 weeks)
   var now = Date.now();
   var weeks = [];
   for (var w = 7; w >= 0; w--) {
@@ -1466,7 +1815,7 @@ function InsightsView(props) {
   }
   var maxWeek = Math.max.apply(null, weeks.map(function(w){return w.count;})) || 1;
 
-  // ── Conversion rates
+  // -- Conversion rates
   var contacted  = accounts.filter(function(a){return ["contacted","meeting","proposal","won"].indexOf(a.status)>-1;}).length;
   var meeting    = accounts.filter(function(a){return ["meeting","proposal","won"].indexOf(a.status)>-1;}).length;
   var proposal   = accounts.filter(function(a){return ["proposal","won"].indexOf(a.status)>-1;}).length;
@@ -1480,7 +1829,7 @@ function InsightsView(props) {
     {label:"Ganho",     count:won,       pct:total?Math.round(won/total*100):0},
   ];
 
-  // ── KPI cards
+  // -- KPI cards
   var kpis = [
     {label:"Total Mapeado",    value:total,     sub:"empresas",          color:"#0f172a", icon:"T"},
     {label:"Fit Alto",         value:byFit[0]&&byFit[0].count||0, sub:"prospects prime",  color:"#065f46", icon:"A"},
@@ -1491,10 +1840,10 @@ function InsightsView(props) {
   if (total === 0) {
     return (
       <div>
-        <div style={{fontSize:26,fontWeight:800,color:"#0f172a",marginBottom:6,letterSpacing:"-0.5px"}}>Insights</div>
-        <div style={{fontSize:13,color:"#64748b",marginBottom:32}}>Dashboard de performance da sua prospecção.</div>
+        <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>{"Relatórios"}</div>
+        <div style={{fontSize:13,color:"#64748b",marginBottom:32}}>{"Dashboard de performance da sua prospecção."}</div>
         <div style={{textAlign:"center",padding:"64px 0",background:"#f8fafc",borderRadius:20,border:"1.5px dashed #e2e8f0"}}>
-          <div style={{fontSize:36,marginBottom:12}}>📊</div>
+          <div style={{fontSize:36,marginBottom:12}}>{"📊"}</div>
           <div style={{fontSize:15,fontWeight:700,color:"#334155",marginBottom:6}}>Nenhum dado ainda</div>
           <div style={{fontSize:12,color:"#94a3b8"}}>Mapeie sua primeira empresa em Busca para comecar a ver insights.</div>
         </div>
@@ -1506,9 +1855,38 @@ function InsightsView(props) {
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:28,flexWrap:"wrap",gap:12}}>
         <div>
-          <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>Insights</div>
-          <div style={{fontSize:13,color:"#64748b"}}>{"Performance da sua prospecção baseada em " + total + " conta" + (total!==1?"s":"") + " mapeada" + (total!==1?"s":"") + "."}</div>
+          <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>{"Relatórios"}</div>
+          <div style={{fontSize:13,color:"#64748b"}}>{"Performance da sua prospecção baseada nas contas mapeadas."}</div>
         </div>
+        <button onClick={function(){exportRelatoriosPDF(accounts,pdfFilters);}} style={{display:"flex",alignItems:"center",gap:7,background:"#fff",border:"1.5px solid #e2e8f0",borderRadius:12,padding:"10px 18px",fontSize:12,fontWeight:600,color:"#475569",cursor:"pointer",fontFamily:"inherit",transition:"all .2s"}}
+          onMouseEnter={function(e){e.currentTarget.style.borderColor="#10b981";e.currentTarget.style.color="#059669";}}
+          onMouseLeave={function(e){e.currentTarget.style.borderColor="#e2e8f0";e.currentTarget.style.color="#475569";}}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Exportar PDF
+        </button>
+      </div>
+      <div style={{background:"#fff",border:"1.5px solid #e8edf4",borderRadius:16,padding:"16px 20px",marginBottom:24,display:"flex",gap:12,flexWrap:"wrap",alignItems:"center"}}>
+        <span style={{fontSize:10,fontWeight:700,color:"#94a3b8",letterSpacing:1,textTransform:"uppercase"}}>Filtros PDF:</span>
+        <select value={pdfFilters.fit} onChange={function(e){setPdfFilters(function(f){return Object.assign({},f,{fit:e.target.value});});}} style={{background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:8,padding:"6px 10px",fontSize:11,color:"#475569",fontFamily:"inherit",cursor:"pointer",outline:"none"}}>
+          <option value="">Todos os fits</option>
+          <option value="ALTO">Fit Alto</option>
+          <option value="MEDIO">{"Fit Médio"}</option>
+          <option value="BAIXO">Fit Baixo</option>
+        </select>
+        <select value={pdfFilters.tier} onChange={function(e){setPdfFilters(function(f){return Object.assign({},f,{tier:e.target.value});});}} style={{background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:8,padding:"6px 10px",fontSize:11,color:"#475569",fontFamily:"inherit",cursor:"pointer",outline:"none"}}>
+          <option value="">Todos os tiers</option>
+          <option value="Tier 1">Tier 1</option>
+          <option value="Tier 2">Tier 2</option>
+          <option value="Tier 3">Tier 3</option>
+        </select>
+        <input value={pdfFilters.nome} onChange={function(e){setPdfFilters(function(f){return Object.assign({},f,{nome:e.target.value});});}}
+          placeholder="Filtrar por nome..."
+          style={{background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:8,padding:"6px 10px",fontSize:11,color:"#0f172a",fontFamily:"inherit",outline:"none",minWidth:130}}/>
+        <input type="date" value={pdfFilters.from} onChange={function(e){setPdfFilters(function(f){return Object.assign({},f,{from:e.target.value});});}}
+          style={{background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:8,padding:"6px 10px",fontSize:11,color:"#0f172a",fontFamily:"inherit",outline:"none"}}/>
+        <span style={{fontSize:10,color:"#94a3b8"}}>{"até"}</span>
+        <input type="date" value={pdfFilters.to} onChange={function(e){setPdfFilters(function(f){return Object.assign({},f,{to:e.target.value});});}}
+          style={{background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:8,padding:"6px 10px",fontSize:11,color:"#0f172a",fontFamily:"inherit",outline:"none"}}/>
       </div>
 
       <div className="kpi-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:14,marginBottom:24}}>
@@ -1528,7 +1906,8 @@ function InsightsView(props) {
         <div style={{background:"rgba(255,255,255,.95)",border:"1px solid rgba(228,235,244,.8)",borderRadius:20,padding:"22px 24px",boxShadow:"0 4px 24px rgba(15,23,42,.07)"}}>
           <div style={{fontSize:10,fontWeight:700,color:"#10b981",letterSpacing:2,textTransform:"uppercase",marginBottom:20,display:"flex",alignItems:"center",gap:6}}>
             <div style={{width:3,height:14,background:"linear-gradient(180deg,#10b981,#059669)",borderRadius:3,boxShadow:"0 0 8px rgba(16,185,129,.4)"}}/>
-            Funil de Conversão
+            {"Funil de Conversão"}
+
           </div>
           {convSteps.map(function(step, i) {
             var colors = ["#0f172a","#0369a1","#7c3aed","#b45309","#065f46"];
@@ -1579,7 +1958,8 @@ function InsightsView(props) {
         <div style={{background:"rgba(255,255,255,.95)",border:"1px solid rgba(228,235,244,.8)",borderRadius:20,padding:"22px 24px",boxShadow:"0 4px 24px rgba(15,23,42,.07)"}}>
           <div style={{fontSize:10,fontWeight:700,color:"#10b981",letterSpacing:2,textTransform:"uppercase",marginBottom:18,display:"flex",alignItems:"center",gap:6}}>
             <div style={{width:3,height:14,background:"linear-gradient(180deg,#10b981,#059669)",borderRadius:3,boxShadow:"0 0 8px rgba(16,185,129,.4)"}}/>
-            Distribuição por Fit
+            {"Distribuição por Fit"}
+
           </div>
           {byFit.map(function(f) {
             return (
@@ -1599,7 +1979,8 @@ function InsightsView(props) {
         <div style={{background:"rgba(255,255,255,.95)",border:"1px solid rgba(228,235,244,.8)",borderRadius:20,padding:"22px 24px",boxShadow:"0 4px 24px rgba(15,23,42,.07)"}}>
           <div style={{fontSize:10,fontWeight:700,color:"#10b981",letterSpacing:2,textTransform:"uppercase",marginBottom:18,display:"flex",alignItems:"center",gap:6}}>
             <div style={{width:3,height:14,background:"linear-gradient(180deg,#10b981,#059669)",borderRadius:3,boxShadow:"0 0 8px rgba(16,185,129,.4)"}}/>
-            Distribuição por Tier
+            {"Distribuição por Tier"}
+
           </div>
           {byTier.map(function(t) {
             return (
@@ -1667,7 +2048,8 @@ function InsightsView(props) {
         <div style={{background:"rgba(255,255,255,.95)",border:"1px solid rgba(228,235,244,.8)",borderRadius:20,padding:"22px 24px",boxShadow:"0 4px 24px rgba(15,23,42,.07)"}}>
           <div style={{fontSize:10,fontWeight:700,color:"#10b981",letterSpacing:2,textTransform:"uppercase",marginBottom:18,display:"flex",alignItems:"center",gap:6}}>
             <div style={{width:3,height:14,background:"linear-gradient(180deg,#10b981,#059669)",borderRadius:3,boxShadow:"0 0 8px rgba(16,185,129,.4)"}}/>
-            Fit Score, Visão Donut
+            {"Fit Score, Visão Donut"}
+
           </div>
           <div style={{display:"flex",alignItems:"center",gap:24}}>
             <DonutChart size={120} hole={0.62}
@@ -1688,7 +2070,8 @@ function InsightsView(props) {
         <div style={{background:"rgba(255,255,255,.95)",border:"1px solid rgba(228,235,244,.8)",borderRadius:20,padding:"22px 24px",boxShadow:"0 4px 24px rgba(15,23,42,.07)"}}>
           <div style={{fontSize:10,fontWeight:700,color:"#10b981",letterSpacing:2,textTransform:"uppercase",marginBottom:18,display:"flex",alignItems:"center",gap:6}}>
             <div style={{width:3,height:14,background:"linear-gradient(180deg,#10b981,#059669)",borderRadius:3,boxShadow:"0 0 8px rgba(16,185,129,.4)"}}/>
-            Funil, Semicírculo
+            {"Funil, Semicírculo"}
+
           </div>
           <div style={{display:"flex",justifyContent:"center",marginBottom:12}}>
             <SemiCircleChart convSteps={convSteps}/>
@@ -1705,7 +2088,8 @@ function InsightsView(props) {
       <div style={{background:"rgba(255,255,255,.95)",border:"1px solid rgba(228,235,244,.8)",borderRadius:20,padding:"22px 24px",boxShadow:"0 4px 24px rgba(15,23,42,.07)",marginTop:18}}>
         <div style={{fontSize:10,fontWeight:700,color:"#10b981",letterSpacing:2,textTransform:"uppercase",marginBottom:18,display:"flex",alignItems:"center",gap:6}}>
           <div style={{width:3,height:14,background:"linear-gradient(180deg,#10b981,#059669)",borderRadius:3,boxShadow:"0 0 8px rgba(16,185,129,.4)"}}/>
-          Métricas de Velocidade
+          {"Métricas de Velocidade"}
+
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:14}}>
           {[
@@ -1727,7 +2111,7 @@ function InsightsView(props) {
   );
 }
 
-// ── MAIN APP ──────────────────────────────────────────────────────────────────
+// -- MAIN APP ------------------------------------------------------------------
 export default function App() {
   var [nav, setNav] = useState("search");
   var [accounts, setAccounts] = useState([]);
@@ -1815,9 +2199,9 @@ export default function App() {
 
   var NAV = [
     {id:"search",    emoji:"🔍", label:"Busca"},
-    {id:"accounts",  emoji:"📁", label:"Contas",     count:accounts.length||null},
+    {id:"accounts",  emoji:"📁", label:"Contas"},
     {id:"sequences", emoji:"📬", label:"Sequências"},
-    {id:"biblioteca",emoji:"📚", label:"Biblioteca", count:seqCount||null},
+    {id:"biblioteca",emoji:"📚", label:"Biblioteca"},
     {id:"pipeline",  emoji:"📊", label:"Pipeline"},
     {id:"relatorios",emoji:"📈", label:"Relatórios"},
   ];
@@ -1865,38 +2249,26 @@ export default function App() {
             return (
               <button key={item.id} onClick={function(){setNav(item.id);}}
                 title={sidebarOpen?"":item.label}
-                style={{width:"100%",display:"flex",alignItems:"center",gap:10,padding:sidebarOpen?"10px 12px":"10px 0",justifyContent:sidebarOpen?"flex-start":"center",borderRadius:12,border:"none",background:active?"linear-gradient(135deg,#10b981,#059669)":"transparent",color:active?"#fff":"#64748b",cursor:"pointer",fontFamily:"inherit",fontSize:13,fontWeight:active?600:500,marginBottom:4,transition:"all .25s cubic-bezier(.22,1,.36,1)",textAlign:"left",boxShadow:active?"0 4px 14px rgba(16,185,129,.3)":"none"}}
+                style={{width:"100%",display:"flex",alignItems:"center",gap:10,padding:sidebarOpen?"10px 12px":"8px 0",justifyContent:sidebarOpen?"flex-start":"center",borderRadius:12,border:"none",background:active?"linear-gradient(135deg,#10b981,#059669)":"transparent",color:active?"#fff":"#64748b",cursor:"pointer",fontFamily:"inherit",fontSize:13,fontWeight:active?600:500,marginBottom:4,transition:"all .25s cubic-bezier(.22,1,.36,1)",textAlign:"left",boxShadow:active?"0 4px 14px rgba(16,185,129,.3)":"none",position:"relative"}}
                 onMouseEnter={function(e){if(!active){e.currentTarget.style.background="#f8fafc";e.currentTarget.style.color="#0f172a";}}}
                 onMouseLeave={function(e){if(!active){e.currentTarget.style.background="transparent";e.currentTarget.style.color="#64748b";}}}>
                 <span style={{fontSize:sidebarOpen?16:20,flexShrink:0,transition:"font-size .2s ease"}}>{item.emoji}</span>
                 <span className={"sidebar-label " + (sidebarOpen?"visible":"hidden")} style={{flex:1}}>
                   {item.label}
                 </span>
-                {sidebarOpen && item.count ? (
-                  <span style={{background:active?"rgba(255,255,255,.25)":"#e8edf4",color:active?"#fff":"#64748b",borderRadius:20,padding:"1px 7px",fontSize:10,fontWeight:700,flexShrink:0}}>
-                    {item.count}
-                  </span>
-                ) : null}
-                {!sidebarOpen && item.count ? (
-                  <span style={{position:"absolute",top:6,right:6,width:16,height:16,background:"#10b981",color:"#fff",borderRadius:"50%",fontSize:8,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 0 0 2px #fff"}}>
-                    {item.count > 9 ? "9+" : item.count}
-                  </span>
-                ) : null}
+
               </button>
             );
           })}
         </nav>
 
-        <div style={{padding:"10px 8px 18px",borderTop:"1px solid #f1f5f9",flexShrink:0,overflow:"hidden"}}>
-          <div className={"sidebar-label " + (sidebarOpen?"visible":"hidden")} style={{fontSize:10,color:"#94a3b8",lineHeight:1.6,paddingLeft:4}}>
-            {accounts.length+" conta"+(accounts.length!==1?"s":"")+" salva"+(accounts.length!==1?"s":"")}
-          </div>
-          {!sidebarOpen && (
-            <div style={{display:"flex",justifyContent:"center"}}>
-              <div style={{width:6,height:6,borderRadius:"50%",background:"#e2e8f0"}}/>
+        {sidebarOpen && (
+          <div style={{padding:"10px 14px 18px",borderTop:"1px solid #f1f5f9",flexShrink:0}}>
+            <div style={{fontSize:10,color:"#94a3b8",lineHeight:1.6}}>
+              {accounts.length+" conta"+(accounts.length!==1?"s":"")+" salva"+(accounts.length!==1?"s":"")}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <div style={{flex:1,overflow:"hidden",display:"flex",flexDirection:"column"}}>
@@ -1916,7 +2288,7 @@ export default function App() {
               {nav==="pipeline"  && (
                 <div>
                   <div style={{fontSize:28,fontWeight:800,color:"#0f172a",marginBottom:4,letterSpacing:"-0.6px"}}>Pipeline</div>
-                  <div style={{fontSize:13,color:"#64748b",marginBottom:24}}>Arraste os cards entre colunas para avançar ou recuar o estágio da prospecção.</div>
+                  <div style={{fontSize:13,color:"#64748b",marginBottom:24}}>{"Arraste os cards entre colunas para avançar ou recuar o estágio da prospecção."}</div>
                   <PipelineView accounts={accounts} onOpen={setOpenAcc} onStatusChange={updateStatus}/>
                 </div>
               )}
